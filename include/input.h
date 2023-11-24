@@ -12,6 +12,8 @@ int get_a_line(FILE *fp, char *buf);
 
 void read_from_file(mdsys_t * sys, int * nprint,char * restfile, char* trajfile, char * ergfile,char * line);
 
+void read_restfile(char *restfile, mdsys_t *sys);
+
 #ifdef __cplusplus
 }
 #endif

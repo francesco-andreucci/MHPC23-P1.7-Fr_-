@@ -41,23 +41,8 @@ int main(int argc, char **argv){
     sys.fz=(double *)malloc(sys.natoms*sizeof(double));
 
     /* read restart */
-    fp=fopen(restfile,"r");
-    if(fp) {
-        for (i=0; i<sys.natoms; ++i) {
-            fscanf(fp,"%lf%lf%lf",sys.rx+i, sys.ry+i, sys.rz+i);
-        }
-        for (i=0; i<sys.natoms; ++i) {
-            fscanf(fp,"%lf%lf%lf",sys.vx+i, sys.vy+i, sys.vz+i);
-        }
-        fclose(fp);
-        azzero(sys.fx, sys.natoms);
-        azzero(sys.fy, sys.natoms);
-        azzero(sys.fz, sys.natoms);
-    } else {
-        perror("cannot read restart file");
-        return 3;
-    }
 
+    read_restfile(restfile, &sys);
     /* initialize forces and energies.*/
     sys.nfi=0;
     force(&sys);

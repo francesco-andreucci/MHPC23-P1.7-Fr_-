@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include<stdlib.h>
 #include "input.h"
-#include"types.h"
+#include "types.h"
+#include "utilities.h"
 
 /* helper function: read a line and then return
    the first string with whitespace stripped off */
@@ -65,4 +66,25 @@ void read_from_file(mdsys_t * sys, int * nprint,char * restfile, char* trajfile,
 
 
 
+    /* read restart */
+void read_restfile(char *restfile, mdsys_t *sys){
+ int i;
+ FILE *fp;
 
+  fp=fopen(restfile,"r");
+    if(fp) {
+        for (i=0; i<sys->natoms; ++i) {
+            fscanf(fp,"%lf%lf%lf",sys->rx+i, sys->ry+i, sys->rz+i);
+        }
+        for (i=0; i<sys->natoms; ++i) {
+            fscanf(fp,"%lf%lf%lf",sys->vx+i, sys->vy+i, sys->vz+i);
+        }
+        fclose(fp);
+        azzero(sys->fx, sys->natoms);
+        azzero(sys->fy, sys->natoms);
+        azzero(sys->fz, sys->natoms);
+    } else {
+        perror("cannot read restart file");
+        exit(3);
+    }
+}
