@@ -7,7 +7,7 @@ extern "C" {
 #include"types.h"
 
 void cleanup(FILE *erg,FILE *traj, mdsys_t sys);
-void allocate(mdsys_t sys);
+void memalloc(mdsys_t *sys);
 
 #ifdef __cplusplus
 }
