@@ -1,5 +1,4 @@
 
-#include"force_comp.h"
 #include"constants.h"
 #include"verlet.h"
 void velverlet1(mdsys_t *sys)
@@ -15,8 +14,7 @@ void velverlet1(mdsys_t *sys)
         sys->ry[i] += sys->dt*sys->vy[i];
         sys->rz[i] += sys->dt*sys->vz[i];
     }
-    /*compute forces and potential energy*/
-        force(sys);
+
 }
 
 void velverlet2(mdsys_t *sys){

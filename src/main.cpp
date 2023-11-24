@@ -72,6 +72,8 @@ int main(int argc, char **argv){
 
         /* propagate system and recompute energies */
         velverlet1(&sys);
+        /*compute forces and potential energy*/
+        force(&sys);
         velverlet2(&sys);
         ekin(&sys);
     }
