@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.16)
 project(ljmd-project VERSION 0.1 LANGUAGES C CXX)
 
 #library for the c functions
-add_library(mdlib  src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/cleanup.c  src/force_comp.c )
+add_library(mdlib  src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c )
 target_link_libraries(mdlib  m)
 target_include_directories(mdlib PUBLIC include/)
 

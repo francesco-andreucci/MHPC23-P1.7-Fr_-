@@ -3,7 +3,7 @@
 #include"input.h"
 #include"output.h"
 #include"verlet.h"
-#include"cleanup.h"
+#include"memory.h"
 #include"force_comp.h"
 #include <math.h>
 #include <stdio.h>
@@ -30,15 +30,7 @@ int main(int argc, char **argv){
 
 
     /* allocate memory */
-    sys.rx=(double *)malloc(sys.natoms*sizeof(double));
-    sys.ry=(double *)malloc(sys.natoms*sizeof(double));
-    sys.rz=(double *)malloc(sys.natoms*sizeof(double));
-    sys.vx=(double *)malloc(sys.natoms*sizeof(double));
-    sys.vy=(double *)malloc(sys.natoms*sizeof(double));
-    sys.vz=(double *)malloc(sys.natoms*sizeof(double));
-    sys.fx=(double *)malloc(sys.natoms*sizeof(double));
-    sys.fy=(double *)malloc(sys.natoms*sizeof(double));
-    sys.fz=(double *)malloc(sys.natoms*sizeof(double));
+    allocate(sys);
 
     /* read restart */
 
