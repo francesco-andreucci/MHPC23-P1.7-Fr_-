@@ -46,5 +46,10 @@ if(ENABLE_TESTING)
   target_include_directories(test_ekin PRIVATE include/)
   target_link_libraries(test_ekin PRIVATE GTest::GTestMain GTest::GTest mdlib m)
   add_test(NAME EkinTest COMMAND test_ekin)
+# gtest for test_Verlet
+  add_executable(test_verlet tests/test_verlet.cpp)
+  target_include_directories(test_verlet PRIVATE include/)
+  target_link_libraries(test_verlet PRIVATE GTest::GTestMain GTest::GTest mdlib)
+  add_test(NAME VerletTest COMMAND test_verlet)
 endif()
 
