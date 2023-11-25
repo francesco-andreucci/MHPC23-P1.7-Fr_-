@@ -32,9 +32,15 @@ if(ENABLE_TESTING)
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
   include(GTest)
 
+  # gtest for test_force
   add_executable(test_force tests/test_forces.cpp)
   target_include_directories(test_force PRIVATE include/)
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib)
   add_test(NAME Force COMMAND test_force)
+# gtest for test_ekin
+  add_executable(test_ekin tests/test_ekin.cpp)
+  target_include_directories(test_ekin PRIVATE include/)
+  target_link_libraries(test_ekin PRIVATE GTest::GTestMain GTest::GTest mdlib m)
+  add_test(NAME EkinTest COMMAND test_ekin)
 endif()
 
