@@ -6,6 +6,10 @@ cmake_minimum_required(VERSION 3.16)
 # set the project name, version, and primary programming language(s) 
 project(ljmd-project VERSION 0.1 LANGUAGES C CXX)
 
+# define minimum c++ version to zakaria's mac
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # set policy to silence warnings about timestamps of downloaded files. review occasionally if it may be set to NEW
 if(POLICY CMP0135)
   cmake_policy(SET CMP0135 OLD)
