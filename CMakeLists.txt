@@ -51,5 +51,9 @@ if(ENABLE_TESTING)
   target_include_directories(test_verlet PRIVATE include/)
   target_link_libraries(test_verlet PRIVATE GTest::GTestMain GTest::GTest mdlib)
   add_test(NAME VerletTest COMMAND test_verlet)
+  # gtest for test_input
+  add_executable(test_input tests/test_input.cpp)
+  target_include_directories(test_input PRIVATE include/)
+  target_link_libraries(test_input PRIVATE GTest::GTestMain GTest::GTest mdlib)
+  add_test(NAME InputTest COMMAND test_input)
 endif()
-
