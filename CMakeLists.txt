@@ -37,13 +37,10 @@ endif()
 
 #library for the c functions
 add_library(mdlib  src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c )
-<<<<<<< HEAD
 if(USE_MPI)
   target_link_libraries(mdlib PUBLIC MPI::MPI_CXX)
 endif()
-=======
 target_compile_options(mdlib PRIVATE -O3)
->>>>>>> development
 # target_link_libraries(mdlib m OpenMP::OpenMP_C)
 target_include_directories(mdlib PUBLIC include/)
 # target_compile_options(mdlib PRIVATE "${OpenMP_CXX_FLAGS}")
