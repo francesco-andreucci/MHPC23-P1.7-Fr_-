@@ -66,7 +66,9 @@ protected:
 
 TEST_F(ForceTest, force0)
 {
-//The particles are further apart than rcut, but inside the box: the force should be zero
+    // define tollerance
+    double toler = 10e-12;
+    //The particles are further apart than rcut, but inside the box: the force should be zero
     sys->rx[0]=1.0;
     sys->rx[1]=1.1+sys->rcut;
     sys->ry[0]=1.0;
@@ -93,9 +95,10 @@ TEST_F(ForceTest, force0)
 
 TEST_F(ForceTest, forceno0)
 {
-/*In this case the particles are close enough to interact: we compare the
- * output of the force command with reference values.
- */
+    // define tollerance
+    double toler = 10e-12;
+    /*In this case the particles are close enough to interact: we compare the
+    * output of the force command with reference values. */
     sys->rx[0]=1.0;
     sys->rx[1]=2.1;
     sys->ry[0]=1.0;
@@ -111,19 +114,20 @@ TEST_F(ForceTest, forceno0)
     ASSERT_DOUBLE_EQ(sys->rz[0], 1.0);
     ASSERT_DOUBLE_EQ(sys->rz[1],2.3);
     force(sys);
-    ASSERT_DOUBLE_EQ(sys->fx[0],-1024.386173537659715);
-    ASSERT_DOUBLE_EQ(sys->fx[1],1024.386173537659715);
-    ASSERT_DOUBLE_EQ(sys->fy[0],-1117.512189313810723);
-    ASSERT_DOUBLE_EQ(sys->fy[1],1117.512189313810723);
-    ASSERT_DOUBLE_EQ(sys->fz[0],-1210.638205089961275);
-    ASSERT_DOUBLE_EQ(sys->fz[1],1210.638205089961275);
+    EXPECT_NEAR(sys->fx[0],-1024.386173537659715, toler);
+    EXPECT_NEAR(sys->fx[1],1024.386173537659715, toler);
+    EXPECT_NEAR(sys->fy[0],-1117.512189313810723, toler);
+    EXPECT_NEAR(sys->fy[1],1117.512189313810723, toler);
+    EXPECT_NEAR(sys->fz[0],-1210.638205089961275, toler);
+    EXPECT_NEAR(sys->fz[1],1210.638205089961275, toler);
 }
 
 
 TEST_F(ForceTest, forceno0pbc)
 {
-/*In this case the particles lie on the same yz plane: the interaction is only along the x direction, but the interparticle distance is nominally larger than box edge.
- */
+    // define tollerance
+    double toler = 10e-12;
+    /*In this case the particles lie on the same yz plane: the interaction is only along the x direction, but the interparticle distance is nominally larger than box edge.*/
     sys->rx[0]=3.7;
     sys->rx[1]=23.558;
     sys->ry[0]=4.6;
@@ -139,12 +143,12 @@ TEST_F(ForceTest, forceno0pbc)
     ASSERT_DOUBLE_EQ(sys->rz[0], 1.9);
     ASSERT_DOUBLE_EQ(sys->rz[1],1.9);
     force(sys);
-    ASSERT_DOUBLE_EQ(sys->fx[0],-59.933619233522784);
-    ASSERT_DOUBLE_EQ(sys->fx[1],59.933619233522784);
-    ASSERT_DOUBLE_EQ(sys->fy[0],0.0);
-    ASSERT_DOUBLE_EQ(sys->fy[1],0.0);
-    ASSERT_DOUBLE_EQ(sys->fz[0],0.0);
-    ASSERT_DOUBLE_EQ(sys->fz[1],0.0);
+    EXPECT_NEAR(sys->fx[0],-59.933619233522784, toler);
+    EXPECT_NEAR(sys->fx[1],59.933619233522784, toler);
+    EXPECT_NEAR(sys->fy[0],0.0, toler);
+    EXPECT_NEAR(sys->fy[1],0.0, toler);
+    EXPECT_NEAR(sys->fz[0],0.0, toler);
+    EXPECT_NEAR(sys->fz[1],0.0, toler);
 }
 
 
