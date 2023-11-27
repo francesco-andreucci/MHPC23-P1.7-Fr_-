@@ -48,9 +48,10 @@ target_include_directories(mdlib PUBLIC include/)
 # add the executable
 add_executable(main src/main.cpp)
 target_compile_options(main PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
-target_link_libraries(main mdlib m)
 if(USE_MPI)
-  target_link_libraries(main PUBLIC MPI::MPI_C)
+  target_link_libraries(main PUBLIC mdlib m MPI::MPI_CXX)
+else()
+  target_link_libraries(main PUBLIC mdlib m)
 endif()
 
 
