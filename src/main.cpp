@@ -9,8 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-#ifdef _MPI
+#ifdef LJMD_MPI
 #include "mpi.h"
 #endif
 
@@ -26,7 +25,7 @@ int main(int argc, char **argv){
     double t_start;
     sys.nsize=1;
     sys.mpirank=0;
-#ifdef _MPI
+#ifdef LJMD_MPI
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &sys.nsize);
     MPI_Comm_rank(MPI_COMM_WORLD, &sys.mpirank);
@@ -39,24 +38,45 @@ int main(int argc, char **argv){
 
     /* read input file */
     read_from_file( &sys, &nprint,restfile,trajfile,ergfile,line);
-    } //endif myrank=0
     sys.nfi=0;
-    //brodcasts
-    //reset of rank
+    } //endif myrank=0
+#ifdef LJMD_MPI
+    MPI_Bcast(&sys.natoms, 1, MPI_INT, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys.mass, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys.epsilon, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys.sigma, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys.rcut, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys.box, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys.nsteps, 1, MPI_INT, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys.dt, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys.nfi, 1, MPI_INT, 0,MPI_COMM_WORLD);
+#endif
+
     /* allocate memory */
     memalloc(&sys);
-if(sys.myrank==0){
+    /*only rank 0 reads input*/
+if(sys.mpirank==0){
     /* read restart */
     read_restfile(restfile, &sys);
 }// endif myrank=0
-
+#ifdef LJMD_MPI
+    MPI_Bcast(sys.rx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys.ry, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys.rz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys.vx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys.vy, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys.vz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys.fx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys.fy, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys.fz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+#endif
     /* initialize forces and energies.*/
 
     force(&sys);
 
     ekin(&sys);
 
-if(sys.myrank==0){
+if(sys.mpirank==0){
     erg=fopen(ergfile,"w");
     traj=fopen(trajfile,"w");
 
@@ -74,11 +94,11 @@ if(sys.myrank==0){
     /* main MD loop */
 
     for(sys.nfi=1; sys.nfi <= sys.nsteps; ++sys.nfi) {
-
+        if(sys.mpirank==0){
         /* write output, if requested */
         if ((sys.nfi % nprint) == 0)
             output(&sys, erg, traj);
-
+        }
         /* propagate system and recompute energies */
         velverlet1(&sys);
         /*compute forces and potential energy*/
@@ -87,14 +107,24 @@ if(sys.myrank==0){
         ekin(&sys);
     }
     /**************************************************/
-
+if(sys.mpirank==0){
     /* clean up: close files, free memory */
     printf("Simulation Done. Run time: %10.3fs\n", wallclock()-t_start);
-
-
+}
+if(sys.mpirank==0){
     cleanup(erg,traj,sys);
-
-#ifdef _MPI
+}else{
+    free(sys.rx);
+    free(sys.ry);
+    free(sys.rz);
+    free(sys.vx);
+    free(sys.vy);
+    free(sys.vz);
+    free(sys.fx);
+    free(sys.fy);
+    free(sys.fz);
+}
+#ifdef LJMD_MPI
     MPI_Finalize();
 #endif
     return 0;
