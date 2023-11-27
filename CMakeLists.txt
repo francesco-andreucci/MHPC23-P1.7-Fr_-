@@ -10,6 +10,16 @@ project(ljmd-project VERSION 0.1 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
+# prefetch and link openmp when found
+# find_package(OpenMP COMPONENTS C REQUIRED)
+# add_definitions(-DOMP_H -DOMP_V2)
+
+# get ride of clang warnings on zakaria's mac
+if(APPLE)
+  add_definitions(-Qunused-arguments)
+endif()
+
 # set policy to silence warnings about timestamps of downloaded files. review occasionally if it may be set to NEW
 if(POLICY CMP0135)
   cmake_policy(SET CMP0135 OLD)
@@ -18,11 +28,9 @@ endif()
 
 #library for the c functions
 add_library(mdlib  src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c )
-target_link_libraries(mdlib  m)
+target_link_libraries(mdlib m OpenMP::OpenMP_C)
 target_include_directories(mdlib PUBLIC include/)
-
-
-
+# target_compile_options(mdlib PRIVATE "${OpenMP_CXX_FLAGS}")
 
 # add the executable
 add_executable(main src/main.cpp)
@@ -32,7 +40,7 @@ target_link_libraries(main mdlib m)
 option(ENABLE_TESTING "Enable building unit tests" ON)
 if(ENABLE_TESTING)
   enable_testing()
-
+  
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
   include(GTest)
 
@@ -52,8 +60,21 @@ if(ENABLE_TESTING)
   target_link_libraries(test_verlet PRIVATE GTest::GTestMain GTest::GTest mdlib)
   add_test(NAME VerletTest COMMAND test_verlet)
   # gtest for test_input
+  # copy ekin_test for input_test
   add_executable(test_input tests/test_input.cpp)
+  set(INPUT_TEST_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/tests/input_test)
+  set(WILDCARD_PATTERN "ekin_test.*")
+  file(GLOB FILES_TO_COPY ${INPUT_TEST_FOLDER}/${WILDCARD_PATTERN})
+  foreach(FILE ${FILES_TO_COPY})
+  get_filename_component(FILENAME ${FILE} NAME)
+  add_custom_command(TARGET test_input POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${FILE} $<TARGET_FILE_DIR:test_input>/${FILENAME}
+      COMMENT "Preparing ${FILENAME} needed for input_test" VERBATIM
+  )
+endforeach()
+# run gtest for input_test
   target_include_directories(test_input PRIVATE include/)
-  target_link_libraries(test_input PRIVATE GTest::GTestMain GTest::GTest mdlib)
-  add_test(NAME InputTest COMMAND test_input)
+  target_link_libraries(test_input PRIVATE GTest::GTestMain GTest::GTest mdlib m)
+  add_test(NAME InputTest
+  COMMAND sh -c "exec $<TARGET_FILE:test_input> < ekin_test.inp")
 endif()
