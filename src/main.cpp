@@ -54,15 +54,20 @@ int main(int argc, char **argv){
 
     /* allocate memory */
     memalloc(&sys);
+//if(sys.mpirank!=0){
+    sys.cx=(double *)malloc(sys.natoms*sizeof(double));
+    sys.cy=(double *)malloc(sys.natoms*sizeof(double));
+    sys.cz=(double *)malloc(sys.natoms*sizeof(double));
+
     /*only rank 0 reads input*/
 if(sys.mpirank==0){
     /* read restart */
     read_restfile(restfile, &sys);
 }// endif myrank=0
 #ifdef LJMD_MPI
-    MPI_Bcast(sys.rx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
-    MPI_Bcast(sys.ry, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
-    MPI_Bcast(sys.rz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+  //  MPI_Bcast(sys.rx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+  //  MPI_Bcast(sys.ry, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+  //  MPI_Bcast(sys.rz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
     MPI_Bcast(sys.vx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
     MPI_Bcast(sys.vy, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
     MPI_Bcast(sys.vz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
@@ -123,6 +128,10 @@ if(sys.mpirank==0){
     free(sys.fx);
     free(sys.fy);
     free(sys.fz);
+    free(sys.cx);
+    free(sys.cy);
+    free(sys.cz);
+
 }
 #ifdef LJMD_MPI
     MPI_Finalize();
