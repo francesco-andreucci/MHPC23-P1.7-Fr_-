@@ -10,6 +10,15 @@ project(ljmd-project VERSION 0.1 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(USE_MPI "Building with MPI" OFF)
+if(USE_MPI)
+  find_package(MPI REQUIRED)
+  add_compile_definitions(MPI=yes)
+  include_directories(${MPI_C_INCLUDE_PATH})
+  include_directories(${MPI_CXX_INCLUDE_PATH})
+endif()
+
+
 
 # prefetch and link openmp when found
 # find_package(OpenMP COMPONENTS C REQUIRED)
@@ -28,6 +37,9 @@ endif()
 
 #library for the c functions
 add_library(mdlib  src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c )
+if(USE_MPI)
+  target_link_libraries(mdlib PUBLIC MPI::MPI_CXX)
+endif()
 # target_link_libraries(mdlib m OpenMP::OpenMP_C)
 target_include_directories(mdlib PUBLIC include/)
 # target_compile_options(mdlib PRIVATE "${OpenMP_CXX_FLAGS}")
