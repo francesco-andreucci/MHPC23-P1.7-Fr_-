@@ -40,14 +40,14 @@ add_library(mdlib  src/utilities.c src/constants.c src/input.c src/output.c src/
 if(USE_MPI)
   target_link_libraries(mdlib PUBLIC MPI::MPI_CXX)
 endif()
-target_compile_options(mdlib PRIVATE -O3)
+target_compile_options(mdlib PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
 # target_link_libraries(mdlib m OpenMP::OpenMP_C)
 target_include_directories(mdlib PUBLIC include/)
 # target_compile_options(mdlib PRIVATE "${OpenMP_CXX_FLAGS}")
 
 # add the executable
 add_executable(main src/main.cpp)
-target_compile_options(main PRIVATE -O3)
+target_compile_options(main PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
 target_link_libraries(main mdlib m)
 
 
