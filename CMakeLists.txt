@@ -40,6 +40,7 @@ if(USE_MPI)
 endif()
 
 #library for the c functions
+<<<<<<< HEAD
 add_library(mdlib src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c )
 
 # compile mdlib with OMP support if used
@@ -54,12 +55,13 @@ if(USE_MPI)
 endif()
 
 # compiling mdlib with optimization flags
-target_compile_options(mdlib PRIVATE -O3)
+target_compile_options(mdlib PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
+# target_link_libraries(mdlib m OpenMP::OpenMP_C)
 target_include_directories(mdlib PUBLIC include/)
 
 # add the executable
 add_executable(main src/main.cpp)
-target_compile_options(main PRIVATE -O3)
+target_compile_options(main PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
 target_link_libraries(main mdlib m)
 
 
