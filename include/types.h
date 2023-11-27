@@ -22,7 +22,7 @@ struct _mdsys {
     double *vx, *vy, *vz;
     double *fx, *fy, *fz;
     int nsize, mpirank;
-#ifdef _MPI
+#ifdef LJMD_MPI
     double *cx, *cy, *cz;
 #endif
 };
