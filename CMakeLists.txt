@@ -6,14 +6,29 @@ cmake_minimum_required(VERSION 3.16)
 # set the project name, version, and primary programming language(s) 
 project(ljmd-project VERSION 0.1 LANGUAGES C CXX)
 
+# set compiler
+set(CMAKE_CXX_COMPILER g++)
+
 # define minimum c++ version to zakaria's mac
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # get ride of clang warnings on zakaria's mac
-if(APPLE)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
   add_definitions(-Qunused-arguments)
 endif()
+
+set(LJMD_CUSTOM_COMPILER_FLAGS "-O3 -Wall -g -Ofast")
+
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  set(LJMD_CUSTOM_COMPILER_FLAGS "${LJMD_CUSTOM_COMPILER_FLAGS} -Ofast")
+endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(LJMD_CUSTOM_COMPILER_FLAGS "${LJMD_CUSTOM_COMPILER_FLAGS} -fexpensive-optimizations")
+endif()
+
 
 # set policy to silence warnings about timestamps of downloaded files. review occasionally if it may be set to NEW
 if(POLICY CMP0135)
