@@ -1,7 +1,6 @@
 #include <math.h>
 #include "types.h"
 #include "utilities.h"
-#include <stdio.h>
 #ifdef _OPENMP
     #include "omp.h"
 #endif
@@ -25,7 +24,7 @@ void force(mdsys_t *sys) {
     double rx, ry, rz, rsq;
     double c12,c6,rcsq;
     double r6, rinv, ffac;
-
+    
 
     /* zero energy and forces */
     // epot = 0.0;
@@ -38,10 +37,11 @@ void force(mdsys_t *sys) {
     // int start, end;
   
     #ifdef _OPENMP
-        // sys->tmax = omp_get_num_threads();
+        sys->tmax = omp_get_num_threads();
         tid = omp_get_thread_num();
     #else
         tid = 0;
+        sys->tmax = 1;
     #endif
 
             fx = sys->fx + (tid * sys->natoms);

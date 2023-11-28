@@ -31,7 +31,10 @@ int main(int argc, char **argv){
     read_from_file(&sys, &nprint,restfile,trajfile,ergfile,line);
 
     #ifdef _OPENMP
-        sys->tmax = omp_get_max_threads();
+    #pragma omp parallel
+        sys.tmax = omp_get_num_threads();
+    #else
+        sys.tmax = 1;
     #endif
 
     /* allocate memory */

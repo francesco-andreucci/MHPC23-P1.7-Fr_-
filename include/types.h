@@ -21,7 +21,7 @@ struct _mdsys {
     double *rx, *ry, *rz;
     double *vx, *vy, *vz;
     double *fx, *fy, *fz;
-    int tmax;
+    int tmax; 
 };
 typedef struct _mdsys mdsys_t;
 
