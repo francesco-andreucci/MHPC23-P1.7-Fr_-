@@ -28,7 +28,7 @@ int main(int argc, char **argv){
     t_start = wallclock();
 
     /* read input file */
-    read_from_file( &sys, &nprint,restfile,trajfile,ergfile,line);
+    read_from_file(&sys, &nprint,restfile,trajfile,ergfile,line);
 
     #ifdef _OPENMP
         sys->tmax = omp_get_max_threads();
