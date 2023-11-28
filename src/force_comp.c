@@ -25,7 +25,7 @@ void force(mdsys_t *sys) {
                        (-12.0 * pow(sys->sigma / r, 12.0) / r +
                         6 * pow(sys->sigma / r, 6.0) / r);
                 sys->epot +=
-                    0.5 * 4.0 * sys->epsilon *
+                     4.0 * sys->epsilon *
                     (pow(sys->sigma / r, 12.0) - pow(sys->sigma / r, 6.0));
                 sys->fx[i] += rx / r * ffac;
                 sys->fx[j] -= rx / r * ffac;
