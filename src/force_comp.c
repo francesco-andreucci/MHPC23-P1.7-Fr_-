@@ -14,13 +14,14 @@ void force(mdsys_t *sys) {
     int i, j, tid, tmax;
 
     double epot = 0.0;
-    #ifdef LJMD_OMP
-        tmax = omp_get_max_threads();
-        tid = omp_get_thread_num();
-    #else
-        tid = 0;
-        tmax = 1;
-    #endif
+    // #ifdef LJMD_OMP
+    // //     omp_set_max_threads(8);
+    //      sys->tmax = omp_get_max_threads();
+    //      tmax = sys->tmax;
+    // #else
+    //      tid = 0;
+    //      tmax = 1;
+    // #endif
 
         /* zero energy and forces */
         double r6, rinv;
@@ -29,9 +30,24 @@ void force(mdsys_t *sys) {
         double rcsq = sys->rcut * sys->rcut;
 
     #ifdef LJMD_OMP
-        #pragma omp parallel reduction(+:epot) //private(rx,ry,rz,rsq)
+        #pragma omp parallel private(i, j, ii, rx1, ry1, rz1, rx,ry,rz,rsq, r6, rinv, rsq) reduction(+:epot)
     #endif
-    { 
+    {   
+        // #ifdef LJMD_OMP
+        //     tid = omp_get_thread_num();
+        //     sys->tmax = tmax;
+        // #endif
+
+
+        #ifdef LJMD_OMP
+            omp_set_max_threads(8);
+            sys->tmax = omp_get_max_threads();
+            tmax = sys->tmax;
+        #else
+            tid = 0;
+            tmax = 1;
+        #endif
+
         double *fx, *fy, *fz;
         int start, end;
         epot = 0.0;
@@ -44,6 +60,7 @@ void force(mdsys_t *sys) {
         azzero(fy, sys->natoms);
         azzero(fz, sys->natoms);
 
+        
         for(int i = 0; i < (sys->natoms - 1); i += tmax)
         {   
             int ii = i + tid;

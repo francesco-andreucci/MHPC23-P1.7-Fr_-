@@ -36,17 +36,20 @@ if(POLICY CMP0135)
 endif()
 
 # turn ON/OFF OMP support
-option(USE_OMP "Building with OPENMP" OFF)
-if(USE_OMP)
-  find_package(OpenMP REQUIRED)
-  add_compile_definitions(OMP=yes)
-  include_directories(${OpenMP_C_INCLUDE_PATH})
-  include_directories(${OpenMP_CXX_INCLUDE_PATH})
-  # add_definitions(-DOMP_V2)
-endif()
-
+option(USE_OMP "Building with OPENMP" ON)
 # turn ON/OFF MPI support
 option(USE_MPI "Building with MPI" OFF)
+
+# OPENMP DEF
+if(USE_OMP)
+  find_package(OpenMP REQUIRED)
+  add_compile_definitions(LJMD_OMP=yes)
+  # include_directories(${OpenMP_C_INCLUDE_PATH})
+  # include_directories(${OpenMP_CXX_INCLUDE_PATH})
+  #add_definitions(-fopenmp)
+endif()
+
+# MPI DEF
 if(USE_MPI)
   find_package(MPI REQUIRED)
   add_compile_definitions(MPI=yes)
@@ -58,10 +61,10 @@ endif()
 add_library(mdlib src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c )
 
 # compile mdlib with OMP support if used
-if(USE_OMP)
-  target_link_libraries(mdlib PUBLIC OpenMP::OpenMP_C)
-  target_compile_options(mdlib PRIVATE "${OpenMP_CXX_FLAGS}")
-endif()
+# if(USE_OMP)
+#   target_link_libraries(mdlib PUBLIC OpenMP::OpenMP_CXX)
+#   target_compile_options(mdlib PRIVATE "${OpenMP_CXX_FLAGS}" )
+# endif()
 
 # compile mdlib with MPI support if used
 if(USE_MPI)
@@ -69,15 +72,22 @@ if(USE_MPI)
 endif()
 
 # compiling mdlib with optimization flags
-target_compile_options(mdlib PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
+target_compile_options(mdlib PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3 )
 target_include_directories(mdlib PUBLIC include/)
 
 # add the executable
 add_executable(main src/main.cpp)
-target_compile_options(main PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
-target_link_libraries(main mdlib m)
+target_compile_options(main PUBLIC -O3 -ffast-math -fexpensive-optimizations -msse3)
 
 
+if(USE_OMP)
+  target_link_libraries(mdlib PUBLIC OpenMP::OpenMP_CXX)
+  target_compile_options(mdlib PUBLIC -fopenmp) 
+
+  target_link_libraries(main PUBLIC OpenMP::OpenMP_CXX)
+  target_compile_options(main PUBLIC -fopenmp)
+endif()
+target_link_libraries(main PUBLIC mdlib m)
 
 # To enable of disable testing
 option(ENABLE_TESTING "Enable building unit tests" ON)

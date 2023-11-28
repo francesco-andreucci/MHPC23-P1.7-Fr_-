@@ -12,6 +12,9 @@
 
 #define LJMD_VERSION 0.1
 
+#ifdef LJMD_OMP
+    #include "omp.h"
+#endif
 
 
 int main(int argc, char **argv){
@@ -73,6 +76,6 @@ int main(int argc, char **argv){
     printf("Simulation Done. Run time: %10.3fs\n", wallclock()-t_start);
 
     cleanup(erg,traj,sys);
-
+    printf("\n tmax = %d \n", sys.tmax);
     return 0;
 }
