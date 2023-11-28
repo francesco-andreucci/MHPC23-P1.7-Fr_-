@@ -9,22 +9,28 @@
 void force(mdsys_t *sys) {
     
     double epot = 0.00000;
+    double c12,c6,rcsq;
+    int j, tid, start, end;
+    double pow6, pow12;
+
+    /* defining pow by repeating product */
+    pow6 = sys->sigma * sys->sigma * sys->sigma * sys->sigma * sys->sigma * sys->sigma;
+    pow12 = sys->sigma * sys->sigma * sys->sigma * sys->sigma * sys->sigma * sys->sigma *\
+                sys->sigma * sys->sigma * sys->sigma * sys->sigma * sys->sigma * sys->sigma;
+
+    /* zero energy and forces */
+    c12 = 4.000 * sys->epsilon * pow12; // pow(sys->sigma, 12.000);
+    c6 = 4.000 * sys->epsilon * pow6;      // pow(sys->sigma, 6.000);
+    rcsq = sys->rcut * sys->rcut;
 
     #ifdef _OPENMP
-        #pragma omp parallel reduction(+:epot)
+        #pragma omp parallel reduction(+:epot) firstprivate(c12, c6, rcsq, j, tid, start, end, pow6, pow12)
     #endif
     { 
-        int j, tid, start, end;
         double *fx, *fy, *fz;
         double rx1, ry1, rz1;
         double rx, ry, rz, rsq;
-        double c12,c6,rcsq;
         double r6, rinv, ffac;
-    
-        /* zero energy and forces */
-        c12 = 4.000 * sys->epsilon * pow(sys->sigma, 12.000);
-        c6 = 4.000 * sys->epsilon * pow(sys->sigma, 6.000);
-        rcsq = sys->rcut * sys->rcut;
   
         /* reading thread id and defining default tid when omp is absent */
         #ifdef _OPENMP
