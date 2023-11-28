@@ -8,7 +8,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define LJMD_OMP
 
 #define LJMD_VERSION 0.1
 
@@ -28,7 +27,9 @@ int main(int argc, char **argv){
 
     #ifdef LJMD_OMP
         sys.tmax = omp_get_max_threads();
-        printf("\n tmax = %d \n", sys.tmax);
+    #else            
+        sys.tmax = 1;
+        printf("\n sys->tmax = %d \n", sys.tmax);
     #endif
     t_start = wallclock();
 

@@ -2,7 +2,7 @@
 #include "types.h"
 #include "utilities.h"
 
-#ifdef LJMD_OMP
+#ifdef _OPENMP
     #include "omp.h"
 #endif
 
@@ -18,11 +18,11 @@ void force(mdsys_t *sys) {
     double c6 = 4.0 * sys->epsilon * pow(sys->sigma, 6.0);
     double rcsq = sys->rcut * sys->rcut;
 
-    #ifdef LJMD_OMP
-        tmax = omp_get_max_threads();
-    #endif
+    // #ifdef _OPENMP
+    //     tmax = omp_get_max_threads();
+    // #endif
 
-    #ifdef LJMD_OMP
+    #ifdef _OPENMP
         #pragma omp parallel reduction(+:epot) private(i, j, tid, tmax, rsq, ffac, r6, rinv) 
     #endif
     { 
@@ -31,12 +31,10 @@ void force(mdsys_t *sys) {
     double *fx, *fy, *fz;
     // int start, end;
   
-        #ifdef LJMD_OMP
+        #ifdef _OPENMP
             tid = omp_get_thread_num();
-            tmax = sys->tmax;
         #else
             tid = 0;
-            tmax = 1;
         #endif
 
             // double *fx, *fy, *fz;
@@ -50,7 +48,7 @@ void force(mdsys_t *sys) {
             azzero(fy, sys->natoms);
             azzero(fz, sys->natoms);
 
-            for (int i = 0; i < (sys->natoms - 1); i += tmax)
+            for (int i = 0; i < (sys->natoms - 1); i += sys->tmax)
             {
                 double rx1, ry1, rz1;
                 int ii = i + tid;
@@ -85,18 +83,20 @@ void force(mdsys_t *sys) {
                 }
             }
         
-        #ifdef LJMD_OMP
+        #ifdef _OPENMP
             #pragma omp barrier
         #endif
 
         int start, end;
-        i = 1 + (sys->natoms / tmax);
+        i = 1 + (sys->natoms / sys->tmax);
         start = (tid) * i;
         end = start + i;
 
-        if(end > sys->natoms) end = sys->natoms;  
-
-        for (i = 1; i < tmax; ++i)
+        if(end > sys->natoms) end = sys->natoms; 
+        #ifdef _OPENMP 
+            #pragma omp for
+        #endif
+        for (i = 1; i < sys->tmax; ++i)
         {   
             int offset = i * sys->natoms;
             for(j = start; j < end; ++j)
