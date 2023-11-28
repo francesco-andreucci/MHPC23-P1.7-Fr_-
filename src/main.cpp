@@ -8,6 +8,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define LJMD_OMP
 
 #define LJMD_VERSION 0.1
 
@@ -25,6 +26,10 @@ int main(int argc, char **argv){
 
     printf("LJMD version %3.1f\n", LJMD_VERSION);
 
+    #ifdef LJMD_OMP
+        sys.tmax = omp_get_max_threads();
+        printf("\n tmax = %d \n", sys.tmax);
+    #endif
     t_start = wallclock();
 
     /* read input file */
@@ -75,6 +80,5 @@ int main(int argc, char **argv){
     printf("Simulation Done. Run time: %10.3fs\n", wallclock()-t_start);
 
     cleanup(erg,traj,sys);
-    printf("\n tmax = %d \n", sys.tmax);
     return 0;
 }

@@ -37,19 +37,16 @@ endif()
 
 # turn ON/OFF OMP support
 option(USE_OMP "Building with OPENMP" ON)
-# turn ON/OFF MPI support
-option(USE_MPI "Building with MPI" OFF)
-
-# OPENMP DEF
 if(USE_OMP)
   find_package(OpenMP REQUIRED)
   add_compile_definitions(LJMD_OMP=yes)
-  # include_directories(${OpenMP_C_INCLUDE_PATH})
-  # include_directories(${OpenMP_CXX_INCLUDE_PATH})
-  #add_definitions(-fopenmp)
+  include_directories(${OpenMP_C_INCLUDE_PATH})
+  include_directories(${OpenMP_CXX_INCLUDE_PATH})
+  add_definitions(-DLJMD_OMP)
 endif()
 
-# MPI DEF
+# turn ON/OFF MPI support
+option(USE_MPI "Building with MPI" OFF)
 if(USE_MPI)
   find_package(MPI REQUIRED)
   add_compile_definitions(MPI=yes)
@@ -57,34 +54,40 @@ if(USE_MPI)
   include_directories(${MPI_CXX_INCLUDE_PATH})
 endif()
 
+#library for the c functions
+add_library(mdlib src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c )
+
 # compile mdlib with OMP support if used
-# if(USE_OMP)
-#   target_link_libraries(mdlib PUBLIC OpenMP::OpenMP_CXX)
-#   target_compile_options(mdlib PRIVATE "${OpenMP_CXX_FLAGS}" )
-# endif()
+if(USE_OMP)
+  target_link_libraries(mdlib PUBLIC OpenMP::OpenMP_C)
+  target_compile_options(mdlib PRIVATE "${OpenMP_CXX_FLAGS}")
+endif()
 
 # compile mdlib with MPI support if used
-# if(USE_MPI)
-#   target_link_libraries(mdlib PUBLIC MPI::MPI_CXX)
-# endif()
+if(USE_MPI)
+  target_link_libraries(mdlib PUBLIC MPI::MPI_CXX)
+endif()
 
-#library for the c functions and compiling mdlib with optimization flags
-add_library(mdlib src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c )
-target_compile_options(mdlib PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3 )
-target_link_libraries(mdlib m)
+# compiling mdlib with optimization flags
+target_compile_options(mdlib PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
 target_include_directories(mdlib PUBLIC include/)
 
 # add the executable
 add_executable(main src/main.cpp)
-target_compile_options(main PUBLIC -O3 -ffast-math -fexpensive-optimizations -msse3)
+target_compile_options(main PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
+target_link_libraries(main mdlib m)
 
-
-if(USE_OMP)
-  target_link_libraries(main PUBLIC OpenMP::OpenMP_CXX)
-  target_compile_options(main PUBLIC -fopenmp) 
-  # target_link_libraries(mdlib PUBLIC OpenMP::OpenMP_CXX)
-  # target_compile_options(mdlib PUBLIC -fopenmp)
-endif()
+# copy the needed input iside build for testing purposes
+set(INPUT_TEST_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/examples)
+set(WILDCARD_PATTERN "ekin_test.*")
+file(GLOB FILES_TO_COPY ${INPUT_TEST_FOLDER}/${WILDCARD_PATTERN})
+foreach(FILE ${FILES_TO_COPY})
+get_filename_component(FILENAME ${FILE} NAME)
+add_custom_command(TARGET test_input POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${FILE} $<TARGET_FILE_DIR:test_input>/${FILENAME}
+    COMMENT "Preparing ${FILENAME} needed for input_test" VERBATIM
+)
+endforeach()
 
 # To enable of disable testing
 option(ENABLE_TESTING "Enable building unit tests" ON)
