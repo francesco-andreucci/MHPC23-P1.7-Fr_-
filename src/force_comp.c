@@ -11,7 +11,7 @@ void force(mdsys_t *sys) {
     double rx, ry, rz;
     double rx1, ry1, rz1;
 
-    int i, j;
+    int i, j, tid, tmax;
 
     double epot = 0.0;
     #ifdef LJMD_OMP
@@ -75,7 +75,27 @@ void force(mdsys_t *sys) {
                 }
             }
         }
-            
+        
+        #ifdef LJMD_OMP
+            #pragma omp barrier
+        #endif           
+
+        i = 1 + (sys->natoms / tmax);
+        start = (tid) * i;
+        end = start + i;
+
+        if(end > sys->natoms) end = sys->natoms;  
+
+        for (i = 1; i < tmax; ++i)
+        {   int j = 0;
+            int offset = i * sys->natoms;
+            for(j = start; j < end; ++j)
+            {
+                sys->fx[j] += sys->fx[offset + j];
+                sys->fy[j] += sys->fy[offset + j];
+                sys->fz[j] += sys->fz[offset + j];
+            }
+        }
 
     }
     sys->epot = epot;
