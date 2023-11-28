@@ -23,6 +23,7 @@ int main(int argc, char **argv){
     FILE *fp,*traj,*erg;
     mdsys_t sys;
     double t_start;
+/*default values for nsize and mpirank without MPI*/
     sys.nsize=1;
     sys.mpirank=0;
 #ifdef LJMD_MPI
@@ -54,20 +55,13 @@ int main(int argc, char **argv){
 
     /* allocate memory */
     memalloc(&sys);
-    /*
-    sys.cx=(double *)malloc(sys.natoms*sizeof(double));
-    sys.cy=(double *)malloc(sys.natoms*sizeof(double));
-    sys.cz=(double *)malloc(sys.natoms*sizeof(double));
-*/
+
     /*only rank 0 reads input*/
 if(sys.mpirank==0){
     /* read restart */
     read_restfile(restfile, &sys);
 }// endif myrank=0
 #ifdef LJMD_MPI
-  //  MPI_Bcast(sys.rx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
-  //  MPI_Bcast(sys.ry, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
-  //  MPI_Bcast(sys.rz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
     MPI_Bcast(sys.vx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
     MPI_Bcast(sys.vy, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
     MPI_Bcast(sys.vz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
@@ -116,23 +110,9 @@ if(sys.mpirank==0){
     /* clean up: close files, free memory */
     printf("Simulation Done. Run time: %10.3fs\n", wallclock()-t_start);
 }
-if(sys.mpirank==0){
-    cleanup(erg,traj,sys);
-}else{
-    free(sys.rx);
-    free(sys.ry);
-    free(sys.rz);
-    free(sys.vx);
-    free(sys.vy);
-    free(sys.vz);
-    free(sys.fx);
-    free(sys.fy);
-    free(sys.fz);
-    free(sys.cx);
-    free(sys.cy);
-    free(sys.cz);
 
-}
+    cleanup(erg,traj,sys);
+
 #ifdef LJMD_MPI
     MPI_Finalize();
 #endif

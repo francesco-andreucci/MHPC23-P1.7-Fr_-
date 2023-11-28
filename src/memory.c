@@ -23,9 +23,10 @@ void memalloc(mdsys_t *sys){
 
  /* clean up: close files, free memory */
 void cleanup(FILE *erg,FILE *traj, mdsys_t sys){
+if(sys.mpirank==0){
     fclose(erg);
     fclose(traj);
-
+}
     free(sys.rx);
     free(sys.ry);
     free(sys.rz);
@@ -35,4 +36,9 @@ void cleanup(FILE *erg,FILE *traj, mdsys_t sys){
     free(sys.fx);
     free(sys.fy);
     free(sys.fz);
+#ifdef LJMD_MPI
+    free(sys.cx);
+    free(sys.cy);
+    free(sys.cz);
+#endif
 }
