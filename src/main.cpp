@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define LJMD_VERSION 0.1
 
 #ifdef LJMD_OMP
