@@ -3,14 +3,14 @@
 //#include <sys/time.h>
 #include <stdio.h>
 
- /* allocate memory*/ 
+/* allocate memory*/ 
 void memalloc(mdsys_t *sys){
-    sys->rx=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
-    sys->ry=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
-    sys->rz=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
-    sys->vx=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
-    sys->vy=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
-    sys->vz=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
+    sys->rx=(double *)malloc(sys->natoms*sizeof(double));
+    sys->ry=(double *)malloc(sys->natoms*sizeof(double));
+    sys->rz=(double *)malloc(sys->natoms*sizeof(double));
+    sys->vx=(double *)malloc(sys->natoms*sizeof(double));
+    sys->vy=(double *)malloc(sys->natoms*sizeof(double));
+    sys->vz=(double *)malloc(sys->natoms*sizeof(double));
     sys->fx=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
     sys->fy=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
     sys->fz=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
