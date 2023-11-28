@@ -14,6 +14,11 @@ void memalloc(mdsys_t *sys){
     sys->fx=(double *)malloc(sys->natoms*sizeof(double));
     sys->fy=(double *)malloc(sys->natoms*sizeof(double));
     sys->fz=(double *)malloc(sys->natoms*sizeof(double));
+#ifdef LJMD_MPI
+    sys->cx=(double *)malloc(sys->natoms*sizeof(double));
+    sys->cy=(double *)malloc(sys->natoms*sizeof(double));
+    sys->cz=(double *)malloc(sys->natoms*sizeof(double));
+#endif
 }
 
  /* clean up: close files, free memory */

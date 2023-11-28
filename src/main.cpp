@@ -54,11 +54,11 @@ int main(int argc, char **argv){
 
     /* allocate memory */
     memalloc(&sys);
-//if(sys.mpirank!=0){
+    /*
     sys.cx=(double *)malloc(sys.natoms*sizeof(double));
     sys.cy=(double *)malloc(sys.natoms*sizeof(double));
     sys.cz=(double *)malloc(sys.natoms*sizeof(double));
-
+*/
     /*only rank 0 reads input*/
 if(sys.mpirank==0){
     /* read restart */
