@@ -11,7 +11,7 @@
 
 #define LJMD_VERSION 0.1
 
-#ifdef LJMD_OMP
+#ifdef _OPENMP
     #include "omp.h"
 #endif
 
@@ -24,18 +24,15 @@ int main(int argc, char **argv){
     double t_start;
 
     printf("LJMD version %3.1f\n", LJMD_VERSION);
-
-    #ifdef LJMD_OMP
-        sys.tmax = omp_get_max_threads();
-    #else            
-        sys.tmax = 1;
-        printf("\n sys->tmax = %d \n", sys.tmax);
-    #endif
+    
     t_start = wallclock();
 
     /* read input file */
     read_from_file( &sys, &nprint,restfile,trajfile,ergfile,line);
 
+    #ifdef _OPENMP
+        sys->tmax = omp_get_max_threads();
+    #endif
 
     /* allocate memory */
     memalloc(&sys);
