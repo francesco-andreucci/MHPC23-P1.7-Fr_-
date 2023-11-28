@@ -2,12 +2,12 @@
 
 # version 3.16 is bundled with ubuntu20.04
 cmake_minimum_required(VERSION 3.16)
-
+set(CMAKE_CXX_COMPILER "/usr/bin/g++" CACHE STRING "C++ compiler" FORCE)
+set(CMAKE_C_COMPILER "/usr/bin/gcc" CACHE STRING "C compiler" FORCE)
 # set the project name, version, and primary programming language(s) 
 project(ljmd-project VERSION 0.1 LANGUAGES C CXX)
 
 # set compiler
-set(CMAKE_CXX_COMPILER g++)
 
 # define minimum c++ version to zakaria's mac
 set(CMAKE_CXX_STANDARD 17)
@@ -22,7 +22,7 @@ set(LJMD_CUSTOM_COMPILER_FLAGS "-O3 -Wall -g -Ofast")
 
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-  set(LJMD_CUSTOM_COMPILER_FLAGS "${LJMD_CUSTOM_COMPILER_FLAGS} -Ofast")
+  set(LJMD_CUSTOM_COMPILER_FLAGS "${LJMD_CUSTOM_COMPILER_FLAGS} -Ofast -Xclang -fopenmp")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -72,6 +72,7 @@ target_link_libraries(main mdlib m)
 
 if(USE_OMP)
   target_link_libraries(main OpenMP::OpenMP_C)
+  target_compile_options(main PUBLIC -Xclang -fopenmp)
 endif()
 
 

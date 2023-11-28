@@ -10,10 +10,6 @@ void force(mdsys_t *sys) {
     
     double epot = 0.0;
 
-    // #ifdef _OPENMP
-    //     sys->tmax = omp_get_max_threads();
-    // #endif
-
     #ifdef _OPENMP
         #pragma omp parallel reduction(+:epot) 
     #endif
@@ -27,21 +23,15 @@ void force(mdsys_t *sys) {
     
 
     /* zero energy and forces */
-    // epot = 0.0;
+    epot = 0.0;
     c12 = 4.0 * sys->epsilon * pow(sys->sigma, 12.0);
     c6 = 4.0 * sys->epsilon * pow(sys->sigma, 6.0);
     rcsq = sys->rcut * sys->rcut;
-
-    // double r, rsq, ffac;
-    // double rx, ry, rz;
-    // int start, end;
   
     #ifdef _OPENMP
-        sys->tmax = omp_get_num_threads();
         tid = omp_get_thread_num();
     #else
         tid = 0;
-        sys->tmax = 1;
     #endif
 
             fx = sys->fx + (tid * sys->natoms);
