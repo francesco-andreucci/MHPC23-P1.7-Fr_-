@@ -76,15 +76,17 @@ if(USE_OMP)
 endif()
 
 
-# copy the needed input iside build for testing purposes
-set(INPUT_TEST_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/examples)
-set(WILDCARD_PATTERN "ekin_test.*")
-file(GLOB FILES_TO_COPY ${INPUT_TEST_FOLDER}/${WILDCARD_PATTERN})
+
+# copy input files from examples to build whenever created
+set(INPUT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/examples)
+set(WILDCARD_PATTERN_INPUT "*")
+file(GLOB FILES_TO_COPY ${INPUT_FOLDER}/${WILDCARD_PATTERN_INPUT})
+list(FILTER FILES_TO_COPY EXCLUDE REGEX ".*Makefile$")
 foreach(FILE ${FILES_TO_COPY})
 get_filename_component(FILENAME ${FILE} NAME)
-add_custom_command(TARGET test_input POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${FILE} $<TARGET_FILE_DIR:test_input>/${FILENAME}
-    COMMENT "Preparing ${FILENAME} needed for input_test" VERBATIM
+add_custom_command(TARGET main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${FILE} $<TARGET_FILE_DIR:main>/${FILENAME}
+    COMMENT "Copied input file: ${FILENAME} to build -> needed for I/O testing" VERBATIM
 )
 endforeach()
 
@@ -121,7 +123,7 @@ if(ENABLE_TESTING)
   get_filename_component(FILENAME ${FILE} NAME)
   add_custom_command(TARGET test_input POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${FILE} $<TARGET_FILE_DIR:test_input>/${FILENAME}
-      COMMENT "Preparing ${FILENAME} needed for input_test" VERBATIM
+      COMMENT "Copied ${FILENAME} to build -> needed for input_test" VERBATIM
   )
 endforeach()
 # run gtest for input_test
