@@ -9,17 +9,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define LJMD_VERSION 0.1
+#define LJMD_VERSION 1.0
 
 #ifdef _OPENMP
     #include "omp.h"
 #endif
 
-
 int main(int argc, char **argv){
-    int nprint, i;
+    int nprint;
     char restfile[BLEN], trajfile[BLEN], ergfile[BLEN], line[BLEN];
-    FILE *fp,*traj,*erg;
+    FILE *traj,*erg; //*fp
     mdsys_t sys;
     double t_start;
 
@@ -31,12 +30,12 @@ int main(int argc, char **argv){
     read_from_file(&sys, &nprint,restfile,trajfile,ergfile,line);
 
     #ifdef _OPENMP
-    #pragma omp parallel
+        #pragma omp parallel
         sys.tmax = omp_get_num_threads();
     #else
         sys.tmax = 1;
     #endif
-
+  
     /* allocate memory */
     memalloc(&sys);
 
@@ -69,7 +68,7 @@ int main(int argc, char **argv){
             output(&sys, erg, traj);
 
         /* propagate system and recompute energies */
-        velverlet1(&sys);
+        velverlet1(&sys); 
         /*compute forces and potential energy*/
         force(&sys);
         velverlet2(&sys);
@@ -79,7 +78,6 @@ int main(int argc, char **argv){
 
     /* clean up: close files, free memory */
     printf("Simulation Done. Run time: %10.3fs\n", wallclock()-t_start);
-
-    cleanup(erg,traj,sys);
+    cleanup(erg, traj, sys);
     return 0;
 }

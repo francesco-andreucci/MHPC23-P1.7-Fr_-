@@ -62,19 +62,18 @@ if(USE_MPI)
 endif()
 
 # compiling mdlib with optimization flags
-target_compile_options(mdlib PRIVATE -O3 -g -ffast-math -fexpensive-optimizations -msse3)
+target_compile_options(mdlib PRIVATE -O3 -g -ffast-math -fexpensive-optimizations -msse3 -Wall)
 target_include_directories(mdlib PUBLIC include/)
 
 # add the executable
 add_executable(main src/main.cpp)
-target_compile_options(main PRIVATE -O3 -g -ffast-math -fexpensive-optimizations -msse3 )
+target_compile_options(main PRIVATE -O3 -g -ffast-math -fexpensive-optimizations -msse3 -Wall)
 target_link_libraries(main mdlib m)
 
 if(USE_OMP)
   target_link_libraries(main OpenMP::OpenMP_C)
   target_compile_options(main PUBLIC -Xclang -fopenmp)
 endif()
-
 
 
 # copy input files from examples to build whenever created
