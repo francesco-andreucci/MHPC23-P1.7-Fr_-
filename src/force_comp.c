@@ -19,7 +19,7 @@ void force(mdsys_t *sys) {
         #pragma omp parallel reduction(+:epot) //private(i, j, tid, rsq, ffac, r6, rinv) 
     #endif
     { 
-    int i, j, tid, start, end, offset;
+    int i, j, tid, start, end;
     double *fx, *fy, *fz;
     double c12,c6,rcsq;
 
@@ -48,20 +48,18 @@ void force(mdsys_t *sys) {
             fy = sys->fy + (tid * sys->natoms);
             fz = sys->fz + (tid * sys->natoms);
 
-            azzero(fx, sys->tmax*sys->natoms);
-            azzero(fy, sys->tmax*sys->natoms);
-            azzero(fz, sys->tmax*sys->natoms);
+            azzero(fx, sys->natoms);
+            azzero(fy, sys->natoms);
+            azzero(fz, sys->natoms);
 
             for (int i = 0; i < (sys->natoms - 1); i += sys->tmax)
             {
-                int ii, j;
                 double rx1, ry1, rz1;
-                ii = i + tid;
+                int ii = i + tid;
 
                 //printf("sys->tmax: %d\t | i: %d\t | tid: %d | ii: %d", sys->tmax, i, tid, ii);
                 // printf("sys->tmax: %d\n", sys->tmax);
-                if (ii >= (sys->natoms - 1))
-                    break;
+                if (ii >= (sys->natoms - 1)) break;
 
                 rx1 = sys->rx[ii];
                 ry1 = sys->ry[ii];
@@ -120,7 +118,7 @@ void force(mdsys_t *sys) {
 
         for(i = 1; i < sys->tmax; ++i)
         {   
-            offset = i * sys->natoms;
+            int offset = i * sys->natoms;
             for(j = start; j < end; ++j)
             {   
                 sys->fx[j] += sys->fx[offset + j];
