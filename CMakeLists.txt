@@ -2,31 +2,30 @@
 
 # version 3.16 is bundled with ubuntu20.04
 cmake_minimum_required(VERSION 3.16)
-
+set(CMAKE_CXX_COMPILER "/usr/bin/g++" CACHE STRING "C++ compiler" FORCE)
+set(CMAKE_C_COMPILER "/usr/bin/gcc" CACHE STRING "C compiler" FORCE)
 # set the project name, version, and primary programming language(s) 
 project(ljmd-project VERSION 0.1 LANGUAGES C CXX)
+
 
 # define minimum c++ version to zakaria's mac
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(USE_MPI "Building with MPI" ON)
-if(USE_MPI)
-  find_package(MPI REQUIRED)
-  add_compile_definitions(LJMD_MPI=yes)
-  include_directories(${MPI_C_INCLUDE_PATH})
-  include_directories(${MPI_CXX_INCLUDE_PATH})
+# get ride of clang warnings on zakaria's mac
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  add_definitions(-Qunused-arguments)
 endif()
 
+set(LJMD_CUSTOM_COMPILER_FLAGS "-O3 -Wall -g -Ofast")
 
 
-# prefetch and link openmp when found
-# find_package(OpenMP COMPONENTS C REQUIRED)
-# add_definitions(-DOMP_H -DOMP_V2)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  set(LJMD_CUSTOM_COMPILER_FLAGS "${LJMD_CUSTOM_COMPILER_FLAGS} -Ofast -Xclang -fopenmp")
+endif()
 
-# get ride of clang warnings on zakaria's mac
-if(APPLE)
-  add_definitions(-Qunused-arguments)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(LJMD_CUSTOM_COMPILER_FLAGS "${LJMD_CUSTOM_COMPILER_FLAGS} -fexpensive-optimizations")
 endif()
 
 # set policy to silence warnings about timestamps of downloaded files. review occasionally if it may be set to NEW
@@ -34,27 +33,69 @@ if(POLICY CMP0135)
   cmake_policy(SET CMP0135 OLD)
 endif()
 
+# turn ON/OFF OMP support
+option(USE_OMP "Building with OPENMP" ON)
+if(USE_OMP)
+  find_package(OpenMP REQUIRED)
+  add_definitions(-Xclang -fopenmp)
+endif()
+
+# turn ON/OFF MPI support
+option(USE_MPI "Building with MPI" OFF)
+if(USE_MPI)
+  find_package(MPI REQUIRED)
+  add_compile_definitions(LJMD_MPI=yes)
+  include_directories(${MPI_C_INCLUDE_PATH})
+  include_directories(${MPI_CXX_INCLUDE_PATH})
+endif()
 
 #library for the c functions
 add_library(mdlib  src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c )
-if(USE_MPI)
-  target_link_libraries(mdlib PUBLIC MPI::MPI_C)
+
+# compile mdlib with OMP support if used
+if(USE_OMP)
+  target_link_libraries(mdlib OpenMP::OpenMP_C)
 endif()
-target_compile_options(mdlib PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
-# target_link_libraries(mdlib m OpenMP::OpenMP_C)
+
+# compile mdlib with MPI support if used
+# if(USE_MPI)
+#   target_link_libraries(mdlib PUBLIC MPI::MPI_C)
+# endif()
+
+# compiling mdlib with optimization flags
+target_compile_options(mdlib PRIVATE -O3 -g -ffast-math -fexpensive-optimizations -msse3 -Wall)
 target_include_directories(mdlib PUBLIC include/)
-# target_compile_options(mdlib PRIVATE "${OpenMP_CXX_FLAGS}")
 
 # add the executable
 add_executable(main src/main.cpp)
-target_compile_options(main PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3)
+
+target_compile_options(main PRIVATE -O3 -ffast-math -fexpensive-optimizations -msse3 -Wall)
 if(USE_MPI)
   target_link_libraries(main PUBLIC mdlib m MPI::MPI_CXX)
 else()
   target_link_libraries(main PUBLIC mdlib m)
 endif()
 
+# if(USE_OMP)
+#   target_link_libraries(main OpenMP::OpenMP_C)
+#   # target_compile_options(main PUBLIC -Xclang -fopenmp)
+# endif()
 
+
+# copy input files from examples to build whenever created
+set(INPUT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/examples)
+set(WILDCARD_PATTERN_INPUT "*")
+file(GLOB FILES_TO_COPY ${INPUT_FOLDER}/${WILDCARD_PATTERN_INPUT})
+list(FILTER FILES_TO_COPY EXCLUDE REGEX ".*Makefile$")
+foreach(FILE ${FILES_TO_COPY})
+get_filename_component(FILENAME ${FILE} NAME)
+add_custom_command(TARGET main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${FILE} $<TARGET_FILE_DIR:main>/${FILENAME}
+    COMMENT "Copied input file: ${FILENAME} to build -> needed for I/O testing" VERBATIM
+)
+endforeach()
+
+# To enable of disable testing
 option(ENABLE_TESTING "Enable building unit tests" ON)
 if(ENABLE_TESTING)
   enable_testing()
@@ -65,11 +106,26 @@ if(ENABLE_TESTING)
   # gtest for test_force
   add_executable(test_force tests/test_forces.cpp)
   target_include_directories(test_force PRIVATE include/)
+
   if(USE_MPI)
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib MPI::MPI_CXX)
   else()
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib)
   endif()
+
+  if(USE_OMP)
+  target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib OpenMP::OpenMP_CXX)
+  target_compile_options(test_force PUBLIC -Xclang -fopenmp)
+  else()
+  target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib)
+  endif()
+
+  # if(USE_OMP)
+  # target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib  OpenMP::OpenMP_CXX)
+  # target_compile_options(test_force PUBLIC -Xclang -fopenmp)
+  # endif()
+
+
   add_test(NAME Force COMMAND test_force)
 # gtest for test_ekin
   add_executable(test_ekin tests/test_ekin.cpp)
@@ -91,7 +147,7 @@ if(ENABLE_TESTING)
   get_filename_component(FILENAME ${FILE} NAME)
   add_custom_command(TARGET test_input POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${FILE} $<TARGET_FILE_DIR:test_input>/${FILENAME}
-      COMMENT "Preparing ${FILENAME} needed for input_test" VERBATIM
+      COMMENT "Copied ${FILENAME} to build -> needed for input_test" VERBATIM
   )
 endforeach()
 # run gtest for input_test
@@ -103,6 +159,4 @@ endforeach()
   endif()
   add_test(NAME InputTest
   COMMAND sh -c "exec $<TARGET_FILE:test_input> < ekin_test.inp")
-
-
 endif()

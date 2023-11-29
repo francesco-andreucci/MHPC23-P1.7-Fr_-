@@ -3,7 +3,7 @@
 //#include <sys/time.h>
 #include <stdio.h>
 
- /* allocate memory*/ 
+/* allocate memory*/ 
 void memalloc(mdsys_t *sys){
     sys->rx=(double *)malloc(sys->natoms*sizeof(double));
     sys->ry=(double *)malloc(sys->natoms*sizeof(double));
@@ -11,13 +11,13 @@ void memalloc(mdsys_t *sys){
     sys->vx=(double *)malloc(sys->natoms*sizeof(double));
     sys->vy=(double *)malloc(sys->natoms*sizeof(double));
     sys->vz=(double *)malloc(sys->natoms*sizeof(double));
-    sys->fx=(double *)malloc(sys->natoms*sizeof(double));
-    sys->fy=(double *)malloc(sys->natoms*sizeof(double));
-    sys->fz=(double *)malloc(sys->natoms*sizeof(double));
+    sys->fx=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
+    sys->fy=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
+    sys->fz=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
 #ifdef LJMD_MPI
-    sys->cx=(double *)malloc(sys->natoms*sizeof(double));
-    sys->cy=(double *)malloc(sys->natoms*sizeof(double));
-    sys->cz=(double *)malloc(sys->natoms*sizeof(double));
+    sys->cx=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
+    sys->cy=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
+    sys->cz=(double *)malloc(sys->tmax*sys->natoms*sizeof(double));
 #endif
 }
 

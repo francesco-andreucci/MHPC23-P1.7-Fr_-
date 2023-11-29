@@ -6,3 +6,13 @@
 .DS_Store
 *build*
 .vscode
+.kdev
+*.tmp
+secret.key
+.class
+.tmp
+.idea/workspace.xml
+Thumbs.db
+.log
+/debug.log
+*.log

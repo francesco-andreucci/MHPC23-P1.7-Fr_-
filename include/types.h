@@ -6,12 +6,6 @@ extern "C" {
 
 
 
-
-
-
-
-
-
 /* structure to hold the complete information
  * about the MD system */
 struct _mdsys {
@@ -25,6 +19,7 @@ struct _mdsys {
 #ifdef LJMD_MPI
     double *cx, *cy, *cz;
 #endif
+    int tmax; 
 };
 typedef struct _mdsys mdsys_t;
 
