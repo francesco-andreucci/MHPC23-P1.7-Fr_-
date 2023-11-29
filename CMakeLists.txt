@@ -65,7 +65,11 @@ if(ENABLE_TESTING)
   # gtest for test_force
   add_executable(test_force tests/test_forces.cpp)
   target_include_directories(test_force PRIVATE include/)
+  if(USE_MPI)
+  target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib MPI::MPI_CXX)
+  else()
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib)
+  endif()
   add_test(NAME Force COMMAND test_force)
 # gtest for test_ekin
   add_executable(test_ekin tests/test_ekin.cpp)
@@ -92,7 +96,13 @@ if(ENABLE_TESTING)
 endforeach()
 # run gtest for input_test
   target_include_directories(test_input PRIVATE include/)
-  target_link_libraries(test_input PRIVATE GTest::GTestMain GTest::GTest mdlib m)
+  if(USE_MPI)
+  target_link_libraries(test_input PRIVATE GTest::GTestMain GTest::GTest mdlib MPI::MPI_CXX)
+  else()
+  target_link_libraries(test_input PRIVATE GTest::GTestMain GTest::GTest mdlib)
+  endif()
   add_test(NAME InputTest
   COMMAND sh -c "exec $<TARGET_FILE:test_input> < ekin_test.inp")
+
+
 endif()
