@@ -4,6 +4,10 @@
 #include "types.h"
 #include "input.h"
 
+#ifdef LJMD_MPI
+#include "mpi.h"
+#endif
+
 class InputTest: public ::testing::Test {
 
 protected:
@@ -27,12 +31,44 @@ TEST_F(InputTest, case1)
     int nprint;
     char restfile[BLEN], trajfile[BLEN], ergfile[BLEN], line[BLEN];
     FILE *traj,*erg;
-
+    sys->mpirank=0;
+    sys->nsize=1;
+#ifdef LJMD_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &sys->mpirank);
+    MPI_Comm_size(MPI_COMM_WORLD, &sys->nsize);
+#endif
+if(sys->mpirank==0){
     read_from_file(sys, &nprint,restfile,trajfile,ergfile,line);
+    sys->nfi=0;
+}
+#ifdef LJMD_MPI
+    MPI_Bcast(&sys->natoms, 1, MPI_INT, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys->mass, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys->epsilon, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys->sigma, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys->rcut, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys->box, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys->nsteps, 1, MPI_INT, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys->dt, 1, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(&sys->nfi, 1, MPI_INT, 0,MPI_COMM_WORLD);
+#endif
     memalloc(sys);
+if(sys->mpirank==0){
+    /* read restart */
     read_restfile(restfile, sys);
+}// endif myrank=0
+#ifdef LJMD_MPI
+    MPI_Bcast(sys->vx, sys->natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys->vy, sys->natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys->vz, sys->natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys->rx, sys->natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys->ry, sys->natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+    MPI_Bcast(sys->rz, sys->natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
+#endif
+if(sys->mpirank==0){
     erg=fopen(ergfile,"w");
     traj=fopen(trajfile,"w");
+}
 
     ASSERT_DOUBLE_EQ(sys->natoms, 2);
     ASSERT_DOUBLE_EQ(sys->mass, 39.948);
@@ -63,3 +99,26 @@ TEST_F(InputTest, case1)
 
     cleanup(erg,traj,*sys);
 }
+
+int main(int argc, char** argv) {
+
+    ::testing::InitGoogleTest(&argc, argv);
+#ifdef LJMD_MPI
+    MPI_Init(&argc, &argv);
+#endif
+
+
+    int result = RUN_ALL_TESTS();
+    printf("%d\n", result);
+
+
+
+
+#ifdef LJMD_MPI
+    MPI_Finalize();
+#endif
+
+    return 0;
+}
+
+
