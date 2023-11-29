@@ -37,7 +37,7 @@ endif()
 option(USE_OMP "Building with OPENMP" ON)
 if(USE_OMP)
   find_package(OpenMP REQUIRED)
-  add_definitions(-Xclang -fopenmp)
+  add_definitions(-fopenmp)
 endif()
 
 # turn ON/OFF MPI support
@@ -115,7 +115,7 @@ if(ENABLE_TESTING)
 
   if(USE_OMP)
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib OpenMP::OpenMP_CXX)
-  target_compile_options(test_force PUBLIC -Xclang -fopenmp)
+  target_compile_options(test_force PUBLIC  -fopenmp)
   else()
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib)
   endif()

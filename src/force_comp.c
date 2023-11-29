@@ -35,7 +35,7 @@ void force(mdsys_t *sys) {
 #endif
 { 
     double *fx, *fy, *fz;
-    // double *cx, *cy, *cz;
+    double *cx, *cy, *cz;
   
     /* reading thread id and defining default tid when omp is absent */
     #ifdef _OPENMP
@@ -44,15 +44,19 @@ void force(mdsys_t *sys) {
         tid = 0;
     #endif
 
+
+
+    #ifdef LJMD_MPI
+    cx = sys->cx + (tid * sys->natoms);
+    cy = sys->cy + (tid * sys->natoms);
+    cz = sys->cz + (tid * sys->natoms);
+    azzero(cx,sys->natoms);
+    azzero(cy,sys->natoms);
+    azzero(cz,sys->natoms);
+    #else
     fx = sys->fx + (tid * sys->natoms);
     fy = sys->fy + (tid * sys->natoms);
     fz = sys->fz + (tid * sys->natoms);
-
-    #ifdef LJMD_MPI
-    azzero(sys->cx,sys->natoms);
-    azzero(sys->cy,sys->natoms);
-    azzero(sys->cz,sys->natoms);
-    #else
     azzero(fx, sys->natoms);
     azzero(fy, sys->natoms);
     azzero(fz, sys->natoms);
@@ -77,12 +81,12 @@ void force(mdsys_t *sys) {
                     ffac = (12.0 * c12 * r6 - 6.0 * c6) * r6 * rinv;
                 #ifdef LJMD_MPI
                     epot += r6 * (c12 * r6 - c6);
-                    sys->cx[ii] += rx * ffac;
-                    sys->cx[j] -= rx * ffac;
-                    sys->cy[ii] += ry * ffac;
-                    sys->cy[j] -= ry * ffac;
-                    sys->cz[ii] += rz * ffac;
-                    sys->cz[j] -= rz * ffac;
+                    cx[ii] += rx * ffac;
+                    cx[j] -= rx * ffac;
+                    cy[ii] += ry * ffac;
+                    cy[j] -= ry * ffac;
+                    cz[ii] += rz * ffac;
+                    cz[j] -= rz * ffac;
                 #else
                     epot += r6 * (c12 * r6 - c6);
                     fx[ii] += rx * ffac;
