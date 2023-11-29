@@ -20,8 +20,8 @@ if(POLICY CMP0135)
 endif()
 
 # this block is used to control the switch ON/OFF of MPI and OMP
-option(USE_OMP "Building with OPENMP" ON)
-option(USE_MPI "Building with MPI" ON)
+option(USE_OMP "Building with OPENMP" OFF)
+option(USE_MPI "Building with MPI" Off)
 
 
 # define colors for bringing attention to OMP&MPI ON/OFF
@@ -62,7 +62,7 @@ else()
 endif()
 
 #library for the c functions
-add_library(mdlib  src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c)
+add_library(mdlib SHARED src/utilities.c src/constants.c src/input.c src/output.c src/verlet.c src/memory.c  src/force_comp.c)
 
 # compile mdlib with OMP support if used
 if(USE_OMP)
@@ -70,7 +70,7 @@ if(USE_OMP)
 endif()
 
 # compiling mdlib with optimization flags
-target_compile_options(mdlib PRIVATE -O3 -g -ffast-math -fexpensive-optimizations -msse3)
+target_compile_options(mdlib PUBLIC -O3 -g -ffast-math -fexpensive-optimizations -msse3)
 target_include_directories(mdlib PUBLIC include/)
 
 # add the executable
