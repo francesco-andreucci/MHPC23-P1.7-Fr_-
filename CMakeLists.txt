@@ -113,7 +113,7 @@ if(ENABLE_TESTING)
   # gtest for test_force
   add_executable(test_force tests/test_forces.cpp)
   target_include_directories(test_force PRIVATE include/)
-
+  
   if(USE_MPI)
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib MPI::MPI_CXX)
   else()
@@ -134,13 +134,9 @@ if(ENABLE_TESTING)
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib)
   endif()
 
-  # if(USE_OMP)
-  # target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib  OpenMP::OpenMP_CXX)
-  # target_compile_options(test_force PUBLIC -Xclang -fopenmp)
-  # endif()
+  add_test(NAME Force
+  COMMAND sh -c "exec mpirun -np 2 $<TARGET_FILE:test_force>")
 
-
-  add_test(NAME Force COMMAND test_force)
 # gtest for test_ekin
   add_executable(test_ekin tests/test_ekin.cpp)
   target_include_directories(test_ekin PRIVATE include/)
