@@ -9,7 +9,6 @@
 void force(mdsys_t *sys) {
     
     int tid, start, end;
-    // double rx1, ry1, rz1;
     int i, j;
     double rx, ry, rz, rsq;
     double r6, rinv, ffac;
