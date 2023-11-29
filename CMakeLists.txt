@@ -19,20 +19,46 @@ if(POLICY CMP0135)
   cmake_policy(SET CMP0135 OLD)
 endif()
 
-# turn ON/OFF OMP support
+# this block is used to control the switch ON/OFF of MPI and OMP
 option(USE_OMP "Building with OPENMP" ON)
+option(USE_MPI "Building with MPI" ON)
+
+
+# define colors for bringing attention to OMP&MPI ON/OFF
+if(NOT WIN32)
+  string(ASCII 27 Esc)
+  set(ColourReset "${Esc}[m")
+  set(BoldRed     "${Esc}[1;31m")
+  set(BoldGreen   "${Esc}[1;32m")
+  set(BoldYellow  "${Esc}[1;33m")
+endif()
+
+# turn ON/OFF OMP support
 if(USE_OMP)
   find_package(OpenMP REQUIRED)
+  message("${BoldGreen} ###################################${ColourReset}")
+  message("${BoldGreen} #       OPENMP SUPPORT IS ON      #${ColourReset}")
+  message("${BoldGreen} ###################################${ColourReset}")
   add_compile_definitions(LJMD_OPENMP=yes)
+else()
+  message("${BoldRed} ###################################${ColourReset}")
+  message("${BoldRed} #       OPENMP SUPPORT IS OFF     #${ColourReset}")
+  message("${BoldRed} ###################################${ColourReset}")
 endif()
 
 # turn ON/OFF MPI support
-option(USE_MPI "Building with MPI" ON)
 if(USE_MPI)
   find_package(MPI REQUIRED)
+  message("${BoldGreen} ###################################${ColourReset}")
+  message("${BoldGreen} #       MPI SUPPORT IS ON         #${ColourReset}")
+  message("${BoldGreen} ###################################${ColourReset}")
   add_compile_definitions(LJMD_MPI=yes)
   include_directories(${MPI_C_INCLUDE_PATH})
   include_directories(${MPI_CXX_INCLUDE_PATH})
+else()
+  message("${BoldRed} ###################################${ColourReset}")
+  message("${BoldRed} #       MPI SUPPORT IS OFF        #${ColourReset}")
+  message("${BoldRed} ###################################${ColourReset}")
 endif()
 
 #library for the c functions
