@@ -13,14 +13,14 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # get ride of clang warnings on zakaria's mac
-if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-  add_definitions(-Qunused-arguments)
-endif()
+# if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+#   add_definitions(-Qunused-arguments)
+# endif()
 
 set(LJMD_CUSTOM_COMPILER_FLAGS "-O3 -Wall -g -Ofast")
 
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(LJMD_CUSTOM_COMPILER_FLAGS "${LJMD_CUSTOM_COMPILER_FLAGS} -Ofast -Xclang -fopenmp")
 endif()
 
@@ -79,8 +79,13 @@ endif()
 
  if(USE_OMP)
    target_link_libraries(main PUBLIC OpenMP::OpenMP_CXX)
-   target_compile_options(main PUBLIC -fopenmp)
-   # target_compile_options(main PUBLIC -Xclang -fopenmp)
+
+   if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+   target_compile_options(main PUBLIC -Xclang -fopenmp)
+   else()
+    target_compile_options(main PUBLIC -fopenmp)
+   endif()
+
  endif()
 
 
@@ -117,7 +122,14 @@ if(ENABLE_TESTING)
 
   if(USE_OMP)
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib OpenMP::OpenMP_CXX)
-  target_compile_options(test_force PUBLIC  -fopenmp)
+  
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  target_compile_options(test_force PUBLIC -Xclang -fopenmp)
+  else()
+   target_compile_options(test_force PUBLIC -fopenmp)
+  endif()
+  
+  # target_compile_options(test_force PUBLIC  -fopenmp)
   else()
   target_link_libraries(test_force PRIVATE GTest::GTestMain GTest::GTest mdlib)
   endif()
