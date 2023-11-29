@@ -11,6 +11,11 @@ void force(mdsys_t *sys) {
     double r, ffac;
     double rx, ry, rz;
     int i, j;
+    double rsq;
+    double r6, rinv;
+    double c12 = 4.0 * sys->epsilon * pow(sys->sigma, 12.0);
+    double c6 = 4.0 * sys->epsilon * pow(sys->sigma, 6.0);
+    double rcsq = sys->rcut * sys->rcut;
 #ifdef LJMD_MPI
     double epot=0.0;
     azzero(sys->cx,sys->natoms);
@@ -26,11 +31,6 @@ void force(mdsys_t *sys) {
     azzero(sys->fy, sys->natoms);
     azzero(sys->fz, sys->natoms);
 #endif
-    double rsq;
-    double r6, rinv;
-    double c12 = 4.0 * sys->epsilon * pow(sys->sigma, 12.0);
-    double c6 = 4.0 * sys->epsilon * pow(sys->sigma, 6.0);
-    double rcsq = sys->rcut * sys->rcut;
     for (i = 0; i < (sys->natoms) - 1; i+=sys->nsize) {
         int ii=i+sys->mpirank;
         if (ii >= (sys->natoms - 1)) break;
