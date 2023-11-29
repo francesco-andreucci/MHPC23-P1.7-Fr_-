@@ -37,11 +37,12 @@ endif()
 option(USE_OMP "Building with OPENMP" ON)
 if(USE_OMP)
   find_package(OpenMP REQUIRED)
-  add_definitions(-fopenmp)
+  #add_definitions(-fopenmp)
+  add_compile_definitions(LJMD_OPENMP=yes)
 endif()
 
 # turn ON/OFF MPI support
-option(USE_MPI "Building with MPI" OFF)
+option(USE_MPI "Building with MPI" ON)
 if(USE_MPI)
   find_package(MPI REQUIRED)
   add_compile_definitions(LJMD_MPI=yes)
@@ -76,10 +77,11 @@ else()
   target_link_libraries(main PUBLIC mdlib m)
 endif()
 
-# if(USE_OMP)
-#   target_link_libraries(main OpenMP::OpenMP_C)
-#   # target_compile_options(main PUBLIC -Xclang -fopenmp)
-# endif()
+ if(USE_OMP)
+   target_link_libraries(main PUBLIC OpenMP::OpenMP_CXX)
+   target_compile_options(main PUBLIC -fopenmp)
+   # target_compile_options(main PUBLIC -Xclang -fopenmp)
+ endif()
 
 
 # copy input files from examples to build whenever created
