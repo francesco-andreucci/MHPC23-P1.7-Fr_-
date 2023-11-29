@@ -8,11 +8,10 @@
 #endif
 
 void force(mdsys_t *sys) {
-    double r, ffac;
-    double rx, ry, rz;
     int i, j;
-    double rsq;
-    double r6, rinv;
+    double rx, ry, rz,rsq;
+    double r6, rinv,ffac;
+
     double c12 = 4.0 * sys->epsilon * pow(sys->sigma, 12.0);
     double c6 = 4.0 * sys->epsilon * pow(sys->sigma, 6.0);
     double rcsq = sys->rcut * sys->rcut;
