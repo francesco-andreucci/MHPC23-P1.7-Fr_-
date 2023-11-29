@@ -157,6 +157,6 @@ if(ENABLE_TESTING)
 
   # pass input test file using I/O
   add_test(NAME InputTest
-  COMMAND sh -c "exec $<TARGET_FILE:test_input> < ekin_test.inp")
+  COMMAND sh -c "exec mpirun -np 2 $<TARGET_FILE:test_input> < ekin_test.inp")
 
 endif()
