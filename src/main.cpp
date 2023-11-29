@@ -32,6 +32,7 @@ int main(int argc, char **argv){
     MPI_Comm_rank(MPI_COMM_WORLD, &sys.mpirank);
 #endif
 
+/*Only process 0 does input/output operations*/
     if(sys.mpirank==0){
     printf("LJMD version %3.1f\n", LJMD_VERSION);
 
@@ -65,9 +66,6 @@ if(sys.mpirank==0){
     MPI_Bcast(sys.vx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
     MPI_Bcast(sys.vy, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
     MPI_Bcast(sys.vz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
-    MPI_Bcast(sys.fx, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
-    MPI_Bcast(sys.fy, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
-    MPI_Bcast(sys.fz, sys.natoms, MPI_DOUBLE, 0,MPI_COMM_WORLD);
 #endif
     /* initialize forces and energies.*/
 
