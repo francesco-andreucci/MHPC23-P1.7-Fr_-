@@ -39,6 +39,15 @@ endif()
 option(USE_OMP "Building with OPENMP" ON)
 if(USE_OMP)
   find_package(OpenMP REQUIRED)
+
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  add_definitions(-Xclang -fopenmp)
+  endif()
+
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_definitions(-fopenmp)
+  endif()
+
 endif()
 
 # turn ON/OFF MPI support
@@ -72,7 +81,7 @@ target_link_libraries(main mdlib m)
 
 if(USE_OMP)
   target_link_libraries(main OpenMP::OpenMP_C)
-  target_compile_options(main PUBLIC -Xclang -fopenmp)
+  # target_compile_options(main PUBLIC -Xclang -fopenmp)
 endif()
 
 
