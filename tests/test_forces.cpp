@@ -3,6 +3,10 @@
 #include "force_comp.h"
 #include "utilities.h"
 
+#ifdef _OPENMP
+    #include "omp.h"
+#endif
+
 class ForceTest: public ::testing::Test {
 
 protected:
@@ -12,6 +16,14 @@ protected:
     void SetUp()
     {
         sys = new mdsys_t;
+        #ifdef _OPENMP
+        #pragma omp parallel
+            sys->tmax = omp_get_max_threads();
+            int tid = omp_get_thread_num();
+        #else
+            sys->tmax = 1;
+            int tid = 0;
+        #endif
         sys->epsilon=0.237900;
         sys->sigma=3.405000;
         sys->rcut=8.5;
@@ -21,13 +33,13 @@ protected:
         sys->mass = 1.0 ;
         sys->rx = new double[2];
         sys->vx = new double[2];
-        sys->fx = new double[2];
+        sys->fx = new double[2*sys->tmax];
         sys->ry = new double[2];
         sys->vy = new double[2];
-        sys->fy = new double[2];
+        sys->fy = new double[2*sys->tmax];
         sys->rz = new double[2];
         sys->vz = new double[2];
-        sys->fz = new double[2];
+        sys->fz = new double[2*sys->tmax];
         sys->rx[0] = 0.0;
         sys->rx[1] = 0.0;
         sys->ry[0] = 0.0;
@@ -46,7 +58,6 @@ protected:
         sys->fy[1] = 0.0;
         sys->fz[0] = 0.0;
         sys->fz[1] = 0.0;
-
     }
 
     void TearDown()
@@ -66,6 +77,7 @@ protected:
 
 TEST_F(ForceTest, force0)
 {
+
     // define tollerance
     double toler = 10e-12;
     //The particles are further apart than rcut, but inside the box: the force should be zero
@@ -95,6 +107,7 @@ TEST_F(ForceTest, force0)
 
 TEST_F(ForceTest, forceno0)
 {
+
     // define tollerance
     double toler = 10e-12;
     /*In this case the particles are close enough to interact: we compare the
@@ -125,6 +138,7 @@ TEST_F(ForceTest, forceno0)
 
 TEST_F(ForceTest, forceno0pbc)
 {
+
     // define tollerance
     double toler = 10e-12;
     /*In this case the particles lie on the same yz plane: the interaction is only along the x direction, but the interparticle distance is nominally larger than box edge.*/
@@ -150,7 +164,3 @@ TEST_F(ForceTest, forceno0pbc)
     EXPECT_NEAR(sys->fz[0],0.0, toler);
     EXPECT_NEAR(sys->fz[1],0.0, toler);
 }
-
-
-
-
