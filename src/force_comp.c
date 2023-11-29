@@ -62,43 +62,43 @@ void force(mdsys_t *sys) {
     azzero(fz, sys->natoms);
     #endif
 
-        for (i = 0; i < (sys->natoms - 1); i += sys->tmax * sys->nsize)
-        {
-            int ii = i + tid + sys->tmax * sys->mpirank;
-            if(ii >= (sys->natoms - 1)) break;
+    for (i = 0; i < (sys->natoms - 1); i += sys->tmax * sys->nsize)
+    {
+     int ii = i + tid + sys->tmax * sys->mpirank;
+     if(ii >= (sys->natoms - 1)) break;
 
-            for (j = ii + 1; j < sys->natoms; ++j)
-            {
-                rx = pbc(sys->rx[ii] - sys->rx[j], 0.5 * sys->box);
-                ry = pbc(sys->ry[ii] - sys->ry[j], 0.5 * sys->box);
-                rz = pbc(sys->rz[ii] - sys->rz[j], 0.5 * sys->box);
-                rsq = (rx * rx) + (ry * ry) + (rz * rz);
+     for (j = ii + 1; j < sys->natoms; ++j)
+     {
+      rx = pbc(sys->rx[ii] - sys->rx[j], 0.5 * sys->box);
+      ry = pbc(sys->ry[ii] - sys->ry[j], 0.5 * sys->box);
+      rz = pbc(sys->rz[ii] - sys->rz[j], 0.5 * sys->box);
+      rsq = (rx * rx) + (ry * ry) + (rz * rz);
                     
-                if (rsq < rcsq)
-                {
-                    rinv = 1.0 / rsq;
-                    r6 = rinv * rinv * rinv;
-                    ffac = (12.0 * c12 * r6 - 6.0 * c6) * r6 * rinv;
-                #ifdef LJMD_MPI
-                    epot += r6 * (c12 * r6 - c6);
-                    cx[ii] += rx * ffac;
-                    cx[j] -= rx * ffac;
-                    cy[ii] += ry * ffac;
-                    cy[j] -= ry * ffac;
-                    cz[ii] += rz * ffac;
-                    cz[j] -= rz * ffac;
-                #else
-                    epot += r6 * (c12 * r6 - c6);
-                    fx[ii] += rx * ffac;
-                    fx[j] -= rx * ffac;
-                    fy[ii] += ry * ffac;
-                    fy[j] -= ry * ffac;
-                    fz[ii] += rz * ffac;
-                    fz[j] -= rz * ffac;
-                #endif
-                }
-            }
-        }
+      if (rsq < rcsq)
+      {
+       rinv = 1.0 / rsq;
+       r6 = rinv * rinv * rinv;
+       ffac = (12.0 * c12 * r6 - 6.0 * c6) * r6 * rinv;
+       #ifdef LJMD_MPI
+        epot += r6 * (c12 * r6 - c6);
+        cx[ii] += rx * ffac;
+        cx[j] -= rx * ffac;
+        cy[ii] += ry * ffac;
+        cy[j] -= ry * ffac;
+        cz[ii] += rz * ffac;
+        cz[j] -= rz * ffac;
+       #else
+        epot += r6 * (c12 * r6 - c6);
+        fx[ii] += rx * ffac;
+        fx[j] -= rx * ffac;
+        fy[ii] += ry * ffac;
+        fy[j] -= ry * ffac;
+        fz[ii] += rz * ffac;
+        fz[j] -= rz * ffac;
+       #endif
+      } // endif (rsq<rcsq)
+     } //end for j
+    } // end for i
         
         #ifdef _OPENMP
             #pragma omp barrier
@@ -110,7 +110,7 @@ void force(mdsys_t *sys) {
 
         if(end > sys->natoms) 
         {
-            end = sys->natoms; 
+           end = sys->natoms;
         }
 
         for(i = 1; i < sys->tmax; ++i)
@@ -127,9 +127,9 @@ void force(mdsys_t *sys) {
                 sys->fy[j] += sys->fy[offset + j];
                 sys->fz[j] += sys->fz[offset + j];
                 #endif
-            }
-        }
-    }
+            } //end j for
+        }     // end i for
+    } // end of parallel
     sys->epot = epot;
 
 #ifdef LJMD_MPI
