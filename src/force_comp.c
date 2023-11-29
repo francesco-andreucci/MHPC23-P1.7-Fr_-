@@ -31,11 +31,13 @@ void force(mdsys_t *sys) {
     double c12 = 4.0 * sys->epsilon * pow(sys->sigma, 12.0);
     double c6 = 4.0 * sys->epsilon * pow(sys->sigma, 6.0);
     double rcsq = sys->rcut * sys->rcut;
-    for (i = sys->mpirank; i < (sys->natoms) - 1; i+=sys->nsize) {
-        for (j = i + 1; j < (sys->natoms); ++j) {
-            rx = pbc(sys->rx[i] - sys->rx[j], 0.5 * sys->box);
-            ry = pbc(sys->ry[i] - sys->ry[j], 0.5 * sys->box);
-            rz = pbc(sys->rz[i] - sys->rz[j], 0.5 * sys->box);
+    for (i = 0; i < (sys->natoms) - 1; i+=sys->nsize) {
+        int ii=i+sys->mpirank;
+        if (ii >= (sys->natoms - 1)) break;
+        for (j = ii + 1; j < (sys->natoms); ++j) {
+            rx = pbc(sys->rx[ii] - sys->rx[j], 0.5 * sys->box);
+            ry = pbc(sys->ry[ii] - sys->ry[j], 0.5 * sys->box);
+            rz = pbc(sys->rz[ii] - sys->rz[j], 0.5 * sys->box);
             rsq = (rx * rx) + (ry * ry) + (rz * rz);
             if (rsq < rcsq) {
                 rinv = 1.0 / rsq;
@@ -45,11 +47,11 @@ void force(mdsys_t *sys) {
 
 #ifdef LJMD_MPI
                 epot += r6 * (c12 * r6 - c6);
-                sys->cx[i] += rx * ffac;
+                sys->cx[ii] += rx * ffac;
                 sys->cx[j] -= rx * ffac;
-                sys->cy[i] += ry * ffac;
+                sys->cy[ii] += ry * ffac;
                 sys->cy[j] -= ry * ffac;
-                sys->cz[i] += rz * ffac;
+                sys->cz[ii] += rz * ffac;
                 sys->cz[j] -= rz * ffac;
 #else
                 sys->epot += r6 * (c12 * r6 - c6);
