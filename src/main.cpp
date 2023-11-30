@@ -24,7 +24,7 @@ int main(int argc, char **argv){
 
     int nprint;
     char restfile[BLEN], trajfile[BLEN], ergfile[BLEN], line[BLEN];
-    FILE *traj,*erg; //*fp
+    FILE *traj,*erg;
     mdsys_t sys;
     double t_start;
 
@@ -122,6 +122,13 @@ if(sys.mpirank==0){
     if(sys.mpirank==0){
     /* clean up: close files, free memory */
     printf("Simulation Done. Run time: %10.3fs\n", wallclock()-t_start);\
+    }
+
+    if (sys.mpirank==0)
+    {    
+        FILE *ben = fopen("benchmark.txt", "a");
+        fprintf(ben, "%d %d %d %lf\n", sys.natoms, sys.tmax, sys.nsize, wallclock()-t_start);
+        fclose(ben);
     }
 
     cleanup(erg,traj,sys);
