@@ -9,6 +9,9 @@ project(ljmd-project VERSION 0.1 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# set release
+set(CMAKE_BUILD_TYPE Release)
+
 # get ride of clang warnings on zakaria's mac
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
    add_definitions(-Qunused-arguments)
@@ -21,7 +24,7 @@ endif()
 
 # this block is used to control the switch ON/OFF of MPI and OMP
 option(USE_OMP "Building with OPENMP" ON)
-option(USE_MPI "Building with MPI" ON)
+option(USE_MPI "Building with MPI" OFF)
 
 
 # define colors for bringing attention to OMP&MPI ON/OFF
@@ -182,7 +185,11 @@ if(ENABLE_TESTING)
   endif()
 
   # pass input test file using I/O
-  add_test(NAME InputTest
-  COMMAND sh -c "exec mpirun -np 2 $<TARGET_FILE:test_input> < ekin_test.inp")
-
+  if(USE_MPI)
+    add_test(NAME InputTest
+      COMMAND sh -c "exec mpirun -np 2 $<TARGET_FILE:test_input> < ekin_test.inp")
+    else()
+      add_test(NAME InputTest
+      COMMAND sh -c "exec $<TARGET_FILE:test_input> < ekin_test.inp")
+   endif()
 endif()
