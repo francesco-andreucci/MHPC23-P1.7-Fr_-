@@ -16,7 +16,7 @@ Ensure the following options are configured based on your requirements:
 3. **ENABLE_TESTING**: Enable to compile tests.
 
 ### Compilation Steps
-This package contains simplified MD code with multi-threading parallelization for simulating atoms with a Lennard-Jones potential. The examples directory contains 3 sets of example input decks and the reference directory the corresponding outputs.
+This package contains simplified MD code with multi-threading parallelization for simulating atoms with a Lennard-Jones potential. The examples directory contains 3 sets of example input decks and the reference directory the corresponding outputs. 
 How to compile:
 
 1. Navigate to the project's root folder.
@@ -27,6 +27,8 @@ How to compile:
    cmake --build build
 ```
 or use the bmake.sh script (./bmake.sh build). This project uses gtest library. Unit tests are configured using googletest, and they automatically detect whether OpenMP and/or MPI are present or not and test accordingly. All the test can be run by typing "make test" from the build folder.
+
+NB. On macOS with Clang, additional settings are applied to address specific warnings and OpenMP support.
 
 Our report is in the file Benchmark_report_MHPC_FZB-1.pdf.
 
