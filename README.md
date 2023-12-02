@@ -9,11 +9,11 @@ The `examples` directory includes three sets of example input decks, and the `re
 ## Compilation Instructions
 
 ### Prerequisites
-Ensure the following options are configured based on your requirements:
+In the CMakeList.txt make sure that the following options are configured based on your requirements:
 
-1. **USE_OPENMP**: Activate OpenMP support.
-2. **USE_MPI**: Activate MPI support.
-3. **ENABLE_TESTING**: Enable to compile tests.
+1. **option(USE_OMP "Building with OPENMP" ON/OFF)**: Activate OpenMP support.
+2. **option(USE_MPI "Building with MPI" ON/OFF)**: Activate MPI support.
+3. **option(ENABLE_TESTING "Enable building unit tests" ON)/OFF**: Enable to compile tests.
 
 ### Compilation Steps
 This package contains simplified MD code with multi-threading parallelization for simulating atoms with a Lennard-Jones potential. The examples directory contains 3 sets of example input decks and the reference directory the corresponding outputs. 
@@ -26,7 +26,27 @@ How to compile:
    cmake -S . -B build
    cmake --build build
 ```
-or use the bmake.sh script (./bmake.sh build). This project uses gtest library. Unit tests are configured using googletest, and they automatically detect whether OpenMP and/or MPI are present or not and test accordingly. All the test can be run by typing "make test" from the build folder.
+or use the bmake.sh script (./bmake.sh build). To run the code, cd to the created build folder then you can run:
+
+1. Serial one: 
+```bash
+    ./main < input_file.inp
+```
+2. OpenMP support
+```bash
+    OMP_NUM_THREADS=#threads ./main < input_file.inp
+```
+3. MPI support
+```bash
+    mpirun -np #mpitaks ./main < input_file.inp
+```
+4. Hybrid OpenMP & MPI
+```bash
+    OMP_NUM_THREADS=#threads mpirun -np #mpitaks ./main < input_file.inp
+```
+Where #threads, and  #mpitaks stands for the desired number of threads and the number of MPI tasks, respectively.
+
+We would like to mention that this project uses gtest library. Unit tests are configured using googletest, and they automatically detect whether OpenMP and/or MPI are present or not and test accordingly. All the test can be run by typing "make test" from the build folder.
 
 NB. On macOS with Clang, additional settings are applied to address specific warnings and OpenMP support.
 
