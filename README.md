@@ -9,7 +9,7 @@ The `examples` directory includes three sets of example input decks, and the `re
 ## Compilation Instructions
 
 ### Prerequisites
-Ensure the following options are configured based on your requirements:
+In the CMakeList.txt make sure that the following options are configured based on your requirements:
 
 1. **USE_OPENMP**: Activate OpenMP support.
 2. **USE_MPI**: Activate MPI support.
