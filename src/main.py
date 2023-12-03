@@ -85,21 +85,20 @@ output.argtypes = (
     )
 output.restype = None
 
+# readrestfile function
+read_restfile = mdlib.read_restfile
+read_restfile.argtypes = [ct.c_char_p, ct.POINTER(mdlib_sys)]
+read_restfile.restype = None
+
 # clean up function
 cleanup = mdlib.cleanup
 cleanup.argtypes = [ct.POINTER(ct.c_void_p), ct.POINTER(ct.c_void_p), ct.POINTER(mdlib_sys)]
 cleanup.restype = None
 
-# Allocate memory
-memalloc(ct.byref(tsys))
-
-# set nfi to zero
-tsys.nfi=0
-
 # read from file 
 def read_file(inputfile):
-    file = open(inputfile,"r")
-    row = [line.rstrip('\n').split(" ")[0] for line in file]
+    with open(inputfile, "r") as file:
+        row = [line.rstrip('\n').split(" ")[0] for line in file]
 
     tsys.natoms = ct.c_int(int(row[0]))
     tsys.mass = ct.c_double(float(row[1]))
@@ -107,15 +106,13 @@ def read_file(inputfile):
     tsys.sigma = ct.c_double(float(row[3]))
     tsys.rcut = ct.c_double(float(row[4]))
     tsys.box = ct.c_double(float(row[5]))
-    tsys.restfile = "".join(row[6].split()).encode()
-    tsys.trajfile = "".join(row[7].split()).encode()
-    tsys.ergfile = "".join(row[8].split()).encode()
+    tsys.restfile = ct.c_char_p("".join(row[6].split()).encode())
+    tsys.trajfile = ct.c_char_p("".join(row[7].split()).encode())
+    tsys.ergfile = ct.c_char_p("".join(row[8].split()).encode())
     tsys.nsteps = ct.c_int(int(float(row[9])))
     tsys.dt = ct.c_double(float(row[10]))
     tsys.nprint = ct.c_int(int(row[11]))
-
-
-
+    
 if __name__ == '__main__':
 	
 	if len(sys.argv) != 1:
@@ -123,6 +120,47 @@ if __name__ == '__main__':
 		read_file(inputfile)
 	else:
             print("Usage: python3 main.py input_file.inp")
+
+
+
+# need this to mimic main
+tsys.tmax = 1
+tsys.nzie = 1
+tsys.mpirank = 0;   
+
+# Allocate memory
+memalloc(ct.byref(tsys))
+
+# set nfi to zero
+tsys.nfi=0
+
+# read restfile
+read_restfile(tsys.restfile, ct.byref(tsys))
+
+# force
+force(ct.byref(tsys))
+
+ekin(ct.byref(tsys))
+
+
+# open files
+
+erg = open(tsys.ergfile,"w");
+traj = open(tsys.trajfile,"w");
+
+print(f"Starting simulation with {tsys.natoms} atoms for {tsys.nsteps} steps.");
+print("     NFI            TEMP            EKIN                 EPOT              ETOT");
+output(ct.byref(tsys), ct.c_void_p(erg.fileno()), ct.c_void_p(traj.fileno()))
+
+
+for tsys.nfi, in range(1, tsys.nsteps, 1):
+        if ((tsys.nfi % tsys.nprint) == 0):
+                output(ct.byref(tsys), ct.c_void_p(erg.fileno()), ct.c_void_p(traj.fileno()))
+        velverlet1(ct.byref(tsys)); 
+        force(ct.byref(tsys))
+        velverlet2(ct.byref(tsys))
+        ekin(ct.byref(tsys))
+
 
 # Test reading file
 print(f"natoms: {tsys.natoms}")
