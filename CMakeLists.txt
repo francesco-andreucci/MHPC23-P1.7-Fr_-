@@ -109,6 +109,15 @@ endif()
     COMMENT "Copied input file: ${FILENAME} to build -> needed for I/O testing" VERBATIM)
   endforeach()
 
+
+
+
+# copy main.py from src to build whenever created
+set(SOURCE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/src/main.py)
+add_custom_command(TARGET main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${SOURCE_FILE} $<TARGET_FILE_DIR:main>
+    COMMENT "Copied input file: main.py to build" VERBATIM2)
+
 # To enable of disable testing
 option(ENABLE_TESTING "Enable building unit tests" ON)
 if(ENABLE_TESTING)

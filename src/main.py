@@ -38,7 +38,7 @@ class mdlib_sys(ct.Structure):
    ]
 
 # Load the mdlib shared library
-mdlib = ct.CDLL('../build/libmdlib.dylib') 
+mdlib = ct.CDLL('libmdlib.dylib') 
 
 # Call the ekin
 tsys = mdlib_sys()
